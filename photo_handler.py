@@ -1,8 +1,10 @@
 import os
 from aiogram.types import InputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import types
-
+# from catalog import handle_catalog_button
 import photo_hendler_two
+import utils
+from keyboards.Inline import Inline_keyboard
 
 image_captions = [
     ["planers/categor",
@@ -29,6 +31,7 @@ image_captions = [
 
 ]
 
+
 async def start_send_photo(bot, chat_id, image_dir):
     global image_direct
     image_direct = image_dir
@@ -43,12 +46,6 @@ async def start_send_photo(bot, chat_id, image_dir):
     current_category_index = 0
     await send_photo(bot, chat_id, current_category_index)
 
-inline_kb = InlineKeyboardMarkup(row_width=2)
-btn_back = InlineKeyboardButton(text='⬅', callback_data='back')
-btn_forward = InlineKeyboardButton(text='➡', callback_data='forward')
-details = InlineKeyboardButton(text='Подробнее', callback_data='details')
-btn_enter = InlineKeyboardButton(text='Подтвердить выбор', callback_data='choose_enter_categorical')
-inline_kb.add(btn_back, btn_forward, btn_enter)
 
 
 async def send_photo(bot, chat_id, current_category_index):
@@ -66,30 +63,30 @@ async def send_photo(bot, chat_id, current_category_index):
             current_photo_path = os.path.join(category_path, images[current_image_index])
             caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
             global current_message_id
-            current_message_id = (await bot.send_photo(chat_id, InputFile(current_photo_path), caption=caption_text, reply_markup=inline_kb)).message_id
+            current_message_id = (await bot.send_photo(chat_id, InputFile(current_photo_path), caption=caption_text, reply_markup=Inline_keyboard.category_product)).message_id
+            print("send photo in ph")
+            print(current_message_id)
+#
+# async def update_photo_caption(bot, chat_id, message_id, caption):
+#     await bot.edit_message_caption(chat_id=chat_id, message_id=message_id, caption=caption, reply_markup=inline_kb)
 
-async def update_photo_caption(bot, chat_id, message_id, caption):
-    await bot.edit_message_caption(chat_id=chat_id, message_id=message_id, caption=caption, reply_markup=inline_kb)
+# async def update_photo(bot, chat_id, photo_path, caption, message_id, inline_kb):
+#     await bot.edit_message_media(
+#         media=types.InputMediaPhoto(InputFile(photo_path), caption=caption),
+#         chat_id=chat_id,
+#         message_id=message_id,
+#         reply_markup=inline_kb
+#     )
 
-async def update_photo(bot, chat_id, photo_path, caption, message_id):
-    await bot.edit_message_media(
-        media=types.InputMediaPhoto(InputFile(photo_path), caption=caption),
-        chat_id=chat_id,
-        message_id=message_id,
-        reply_markup=inline_kb
-    )
-
-
-
-
-async def send_photo_to_categorical(bot, chat_id, current_category_index):
+async def send_photo_to_categorical(bot, chat_id, current_category_index, message_id):
+    print("send_to_categorical in ph")
     for category, subcategories in image_captions:
         if image_direct == category:
             category_info = subcategories[current_category_index]
             category_name, category_path_suffix = category_info[1], category_info[2]
             global current_image_index
             current_image_index = 0
-            await photo_hendler_two.send_photo(bot,chat_id,category_path_suffix,category_name)
+            await photo_hendler_two.send_photo(bot,chat_id,category_path_suffix,category_name, message_id)
 
 
 async def process_callback(bot, callback_query):
@@ -100,11 +97,18 @@ async def process_callback(bot, callback_query):
     elif callback_query.data == 'forward':
         if current_category_index < len(categories_1) - 1:
             current_category_index = (current_category_index + 1) % len(categories_1)
+
     elif callback_query.data == 'choose_enter_categorical':
-        category_name, category_path_suffix = categories_1[current_category_index], \
-                                             image_captions[0][1][current_category_index][2]
-        await bot.send_message(callback_query.message.chat.id, f"Вы выбрали категорию: {category_name}")
-        await send_photo_to_categorical(bot, callback_query.message.chat.id, current_category_index)
+        print("Callback ph")
+        print(callback_query.message.message_id)
+        # category_name, category_path_suffix = categories_1[current_category_index], \
+        #                                      image_captions[0][1][current_category_index][2]
+        # await bot.send_message(callback_query.message.chat.id, f"Вы выбрали категорию: {category_name}")
+        await send_photo_to_categorical(bot, callback_query.message.chat.id, current_category_index, callback_query.message.message_id)
+
+    # elif callback_query.data == "back_return":
+        # await handle_catalog_button(bot, callback_query.message.chat.id)
+        # await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     for category, subcategories in image_captions:
         if image_direct == category:
             category_info = subcategories[current_category_index]
@@ -116,11 +120,18 @@ async def process_callback(bot, callback_query):
             if callback_query.data == 'back':
                 if current_image_index > 0:
                     current_image_index = (current_image_index - 1) % len(images)
+                    current_photo_path = os.path.join(category_path,images[current_image_index])
+                    caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
+                    await utils.update_photo(bot,callback_query.message.chat.id,current_photo_path,caption_text,
+                                             callback_query.message.message_id,inline_kb = Inline_keyboard.category_product)
             elif callback_query.data == 'forward':
                 if current_image_index < len(images) - 1:
                     current_image_index = (current_image_index + 1) % len(images)
+                    current_photo_path = os.path.join(category_path,images[current_image_index])
+                    caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
+                    await utils.update_photo(bot,callback_query.message.chat.id,current_photo_path,caption_text,
+                                             callback_query.message.message_id,inline_kb = Inline_keyboard.category_product)
 
-            global current_photo_path
-            current_photo_path = os.path.join(category_path, images[current_image_index])
-            caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
-            await update_photo(bot, callback_query.message.chat.id, current_photo_path, caption_text, callback_query.message.message_id)
+
+
+            await utils.update_photo(bot, callback_query.message.chat.id, current_photo_path, caption_text, callback_query.message.message_id, inline_kb = Inline_keyboard.category_product)

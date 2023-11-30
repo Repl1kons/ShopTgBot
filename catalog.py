@@ -1,19 +1,16 @@
 from photo_handler import start_send_photo
 from aiogram import types
-
-product_categories = ['📔 Ежедневники', '💳 Кард-холдеры', '🖼 Обложки']
+from keyboards.Inline import Inline_keyboard
 
 async def handle_catalog_button(bot, chat_id):
-    markup = types.InlineKeyboardMarkup(row_width = 1)  # Создаем Inline клавиатуру
-    for category in product_categories:
-        button = types.InlineKeyboardButton(text = category,callback_data = f'category_{category}')
-        markup.add(button)
-
-    await bot.send_message(chat_id, "Выберите категорию товаров", reply_markup = markup)
+    global messageid
+    messageid = (await bot.send_message(chat_id, "Выберите категорию товаров", reply_markup = Inline_keyboard.show_catalogs)).message_id
 
 
 
 async def show_category_products(bot, chat_id, category):
+    global messageid
+    # await bot.delete_message(chat_id = chat_id, message_id = messageid)
     if category == "📔 Ежедневники":
         await bot.send_message(chat_id, "Выберите конкретный ежедневник:")
         path = "planers/categor"
