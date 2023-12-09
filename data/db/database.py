@@ -1,15 +1,19 @@
 import sqlite3
 
 """База данных"""
-def add_user(user_id, name, city, region, street, number_house):
-    conn = sqlite3.connect('data/bot_database.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO users (user_id, name_str, city, region, street, number_house) 
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (user_id, name, city, region, street, number_house))
-    conn.commit()
-    conn.close()
+def add_user(user_id, name, city, region, street, number_house, indecs):
+    sql = '''
+        INSERT INTO users (user_id, name_str, city, region, street, number_house, indecs) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    '''
+    with sqlite3.connect('data/bot_database.db') as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, (user_id, name, city, region, street, number_house, indecs))
+            conn.commit()
+        except sqlite3.Error as e:
+            conn.rollback()
+            print(f"Error inserting user: {e}")
 
 """База данных заказов"""
 def add_order(user_id, product_id, quantity, price):
@@ -43,7 +47,7 @@ def is_name_filled(user_id):
 def get_user_data(user_id):
     conn = sqlite3.connect('data/bot_database.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT name_str, city, region, street, number_house FROM users WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT name_str, city, region, street, number_house, indecs FROM users WHERE user_id = ?', (user_id,))
     user_data = cursor.fetchone()
     conn.commit()
     conn.close()

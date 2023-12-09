@@ -11,7 +11,8 @@ def create_database():
             city TEXT,
             region TEXT,
             street TEXT,
-            number_house TEXT
+            number_house TEXT,
+            indecs TEXT
         )
     ''')
 
@@ -21,6 +22,7 @@ def create_database():
         user_id INTEGER,
         item_name TEXT,
         articul TEXT,
+        selected_category TEXT,
         selected_variant TEXT,
         quantity INTEGER,
         price REAL,

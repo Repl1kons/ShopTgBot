@@ -12,14 +12,16 @@ async def show_category_products(bot, chat_id, category):
     global messageid
     # await bot.delete_message(chat_id = chat_id, message_id = messageid)
     if category == "📔 Ежедневники":
-        await bot.send_message(chat_id, "Выберите конкретный ежедневник:")
         path = "planers/categor"
+        await bot.delete_message(chat_id,messageid)
         await start_send_photo(bot, chat_id, path)
+
     if category == "🖼 Обложки":
-        await bot.send_message(chat_id, "Выберите конкретную обложку:")
         path = "covers/categor"
+        await bot.delete_message(chat_id,messageid)
         await start_send_photo(bot, chat_id, path)
+
     if category == "💳 Кард-холдеры":
-        await bot.send_message(chat_id, "Выберите конкретный кард-холдер:")
         path = "cardholder/categor"
+        await bot.delete_message(chat_id,messageid)
         await start_send_photo(bot, chat_id, path)
