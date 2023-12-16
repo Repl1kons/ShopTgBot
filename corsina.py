@@ -21,7 +21,9 @@ async def add_to_cart(user_id, item_name, articul, selected_variant, quantity, p
     conn.close()
 
 
+
 async def show_cart(bot, message: types.Message):
+
     user_id = message.from_user.id
     conn = sqlite3.connect('data/bot_database.db')
     cursor = conn.cursor()
@@ -42,7 +44,6 @@ async def show_cart(bot, message: types.Message):
         item_number += 1  # Увеличиваем счетчик для следующего товара
     global message_id
     if cart_contents:
-        # data.db.database.delete_user(message.from_user.id)
         cart_contents += f"Доставка: 300 руб\n*Всего к оплате: {total_price + 300} руб.*"
         message_id = (await bot.send_message(user_id, f"*🛒 Ваша Корзина*\n\n{cart_contents}", reply_markup=Inline_keyboard.keyboard_basket, parse_mode='Markdown')).message_id
     else:

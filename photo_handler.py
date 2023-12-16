@@ -9,7 +9,7 @@ image_captions = [
     ["planers/categor",
         [
             ["0", "Ежедневник 'ToDo'", "planers/planers_1", "📓 *Формат:* А5\n📄 *104 листа*\n🕒 *Без привязки к году/месяцам*\n🔖 *Твердый переплет*", "more/planners_1"],
-            ["1", "Ежедневник (без рисунков)", "planers/planers_2", "📘 *Формат:* B6\n📄 *104 листа с различной разлиновкой* (на месяц, каждый день)\n🗓️ *Рассчитан на 13 месяцев по 31 дню*\n🕒 *Без привязки к году/месяцам*\n✍️ *К каждому месяцу есть: трекер привычек, лист с задачами*\n🔖 *Твердый переплет: Ляссе*", "more/planners_2"],
+            ["1", "Ежедневник (без рисунков)", "planers/planers_2", "📘 *Формат:* B6\n📄 *104 листа с различной разлиновкой* (на месяц, каждый день)\n🗓️ *Рассчитан на 13 месяцев по 31 дню*\n🕒 *Без привязки к году/месяцам*\n✍️ *К каждому месяцу есть:* \n -трекер привычек\n -лист с задачами\n🔖 *Твердый переплет: Ляссе*", "more/planners_2"],
             ["2", "Ежедневник (с рисунками)", "planers/planers_3", "📘 *Формат:* B6\n📄 *104 листа с различной разлиновкой* (на месяц, каждый день)\n🗓️ *Рассчитан на 13 месяцев по 31 дню*\n🕒 *Без привязки к году/месяцам*\n✍️ *К каждому месяцу есть: трекер привычек, лист с задачами*\n🔖 *Твердый переплет: Ляссе*", "more/planners_3"],
             ["3", "Ежедневник '365'", "planers/planers_4", "📒 *Формат:* B6\n📄 *104 листа с различной разлиновкой:*\n    - в точку\n    - в линейку\n    - в клетку\n    - с рисунками\n🕒 *Без привязки к году/месяцам*\n🔖 *Твердый переплет: Ляссе*", "more/planners_4"]
         ]
@@ -27,7 +27,6 @@ image_captions = [
             ["0","Кард-холдер","cardholder/cardholder_1", "💳 *Удобный чехол* под магнитную карту", "more/cardholder_1"],
         ]
     ]
-
 ]
 
 
@@ -51,21 +50,23 @@ async def start_send_photo(bot, chat_id, image_dir):
 async def send_photo(bot, chat_id, current_category_index):
     for category, subcategories in image_captions:
         if image_direct == category:
-            category_info = subcategories[current_category_index]
-            global category_path_suffix
-            category_name, category_path_suffix = category_info[1], category_info[2]
-            print(f"category_info {category_info} Category_name {category_name}")
-            category_path = os.path.join(image_direct)
-            images = [f for f in os.listdir(category_path) if os.path.isfile(os.path.join(category_path, f))]
-            global current_image_index
-            current_image_index = 0
-            global current_photo_path
-            current_photo_path = os.path.join(category_path, images[current_image_index])
-            caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
-            global current_message_id
-            current_message_id = (await bot.send_photo(chat_id, InputFile(current_photo_path), caption=caption_text, reply_markup=Inline_keyboard.category_product)).message_id
-            print("send photo in ph")
-            print(current_message_id)
+            if 0 <= current_category_index < len(subcategories):
+                category_info = subcategories[current_category_index]
+            # category_info = subcategories[current_category_index]
+                global category_path_suffix
+                category_name, category_path_suffix = category_info[1], category_info[2]
+                print(f"category_info {category_info} Category_name {category_name}")
+                category_path = os.path.join(image_direct)
+                images = [f for f in os.listdir(category_path) if os.path.isfile(os.path.join(category_path, f))]
+                global current_image_index
+                current_image_index = 0
+                global current_photo_path
+                current_photo_path = os.path.join(category_path, images[current_image_index])
+                caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
+                global current_message_id
+                current_message_id = (await bot.send_photo(chat_id, InputFile(current_photo_path), caption=caption_text, reply_markup=Inline_keyboard.category_product)).message_id
+                print("send photo in ph")
+                print(current_message_id)
 
 
 async def send_photo_to_categorical(bot, chat_id, current_category_index, message_id):
@@ -108,13 +109,13 @@ async def process_callback(bot, callback_query):
             images = [f for f in os.listdir(category_path) if os.path.isfile(os.path.join(category_path, f))]
             global current_image_index
             if callback_query.data == 'back':
-                if current_image_index > 0:
-                    current_image_index = (current_image_index - 1) % len(images)
-                    current_photo_path = os.path.join(category_path,images[current_image_index])
-                    print(f"images {images[current_image_index]}")
-                    caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
-                    await utils.update_photo(bot,callback_query.message.chat.id,current_photo_path,caption_text,
-                                             callback_query.message.message_id,inline_kb = Inline_keyboard.category_product)
+                # if current_image_index > 0:
+                current_image_index = (current_image_index - 1) % len(images)
+                current_photo_path = os.path.join(category_path,images[current_image_index])
+                print(f"images {images[current_image_index]}")
+                caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
+                await utils.update_photo(bot,callback_query.message.chat.id,current_photo_path,caption_text,
+                                         callback_query.message.message_id,inline_kb = Inline_keyboard.category_product)
             elif callback_query.data == 'forward':
                 # if current_image_index < len(images) - 1:
                 current_image_index = (current_image_index + 1) % len(images)

@@ -16,7 +16,7 @@ show_basket_add.add(show_basket)
 # show_basket_return.add(show_basket_ret)
 
 """Клавиатура каталога товаров"""
-product_categories = ['📔 Ежедневники', '💳 Кард-холдеры', '🖼 Обложки']
+product_categories = ['📔 Ежедневники', '💳 Кард-холдеры', '🖼 Обложки', "🔍 Поиск артикула"]
 show_catalogs = InlineKeyboardMarkup(row_width = 1)
 for category in product_categories:
     catalogs_button = InlineKeyboardButton(text = category, callback_data = f'category_{category}')
@@ -41,6 +41,7 @@ back_return_1 = InlineKeyboardButton(text = '🚪 Назад', callback_data = '
 category_product_1.add(btn_back_1, btn_forward_1, back_return_1, btn_enter)
 
 
+
 # category_product_1 = InlineKeyboardMarkup(row_width = 2)
 # btn_back_1 = InlineKeyboardButton(text = '⬅', callback_data = 'back_1')
 # btn_forward_1 = InlineKeyboardButton(text = '➡', callback_data = 'forward_1')
@@ -56,6 +57,28 @@ amount_min = InlineKeyboardButton(text = '➖', callback_data = 'amount_min')
 btn_enter = InlineKeyboardButton(text = '✅ Добавить в корзину', callback_data = 'choose_enter')
 return_back_to_choose_categorical = InlineKeyboardButton(text = '🚪 Вернуться', callback_data = 'back_to_choose')
 product_show.add(btn_back, btn_forward, amount_min, amount_sum, return_back_to_choose_categorical, btn_enter)
+
+product_show_nol = InlineKeyboardMarkup(row_width = 2)
+product_show_nol.add(btn_back, btn_forward, return_back_to_choose_categorical)
+
+
+
+product_show_articul = InlineKeyboardMarkup(row_width = 2)
+product_show_articul_for_admin = InlineKeyboardMarkup(row_width = 2)
+amount_sum_1 = InlineKeyboardButton(text = '➕', callback_data = 'amount_sum_1')
+amount_min_1 = InlineKeyboardButton(text = '➖', callback_data = 'amount_min_1')
+set_amount = InlineKeyboardButton(text = 'Установить кол-во', callback_data = 'set_amount')
+btn_enter_1 = InlineKeyboardButton(text = '✅ Добавить в корзину', callback_data = 'choose_enter_1')
+product_show_articul.add(amount_min_1, amount_sum_1, back_return, btn_enter_1)
+product_show_articul_for_admin.add(amount_min_1, amount_sum_1, back_return, set_amount, btn_enter_1)
+
+
+product_show_articul_nol = InlineKeyboardMarkup(row_width = 2)
+product_show_articul_nol.add(back_return)
+
+
+product_show_articul_nol_for_admin = InlineKeyboardMarkup(row_width = 2)
+product_show_articul_nol_for_admin.add(back_return, set_amount)
 
 """Клавиатура для подтверждения данных пользователя"""
 data_enter = InlineKeyboardButton(text = '✅ Да, все верно', callback_data = 'data-enter')
@@ -78,7 +101,8 @@ profil_data_edit = InlineKeyboardButton(text = '✏ Изменить', callback_
 profil_data = InlineKeyboardMarkup().add(profil_data_edit)
 
 profil_data_edit_1 = InlineKeyboardButton(text = '✏ Изменить', callback_data = 'change_data_1')
-profil_data_1 = InlineKeyboardMarkup().add(profile_data_return, profil_data_edit_1)
+profil_data_order = InlineKeyboardButton(text = 'Мои заказы', callback_data = "myOrder")
+profil_data_1 = InlineKeyboardMarkup().add(profile_data_return, profil_data_edit_1, profil_data_order)
 
 # для регистрации в кнопке профиль
 not_profil_data_edit_for_profil = InlineKeyboardButton(text = '🐱‍💻 Зарегистрироваться', callback_data = 'create_data_profil')

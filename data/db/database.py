@@ -26,6 +26,47 @@ def add_order(user_id, product_id, quantity, price):
     conn.commit()
     conn.close()
 
+
+async def add_product(articul, name, variant, price, photo_path):
+    conn = sqlite3.connect('data/bot_product.db')
+    cursor = conn.cursor()
+
+    # Проверка, существует ли уже продукт с этим артикулом
+    cursor.execute("SELECT * FROM product WHERE articul = ?", (articul,))
+    product = cursor.fetchone()
+
+    if product is None:
+        # Если продукта нет, вставляем новую запись
+        cursor.execute('''
+            INSERT INTO product (articul, name_product, variant, price, photo_path) 
+            VALUES (?, ?, ?, ?, ?)
+        ''', (articul, name, variant, price, photo_path))
+    else:
+        # Если продукт существует, обновляем его данные
+        cursor.execute('''
+            UPDATE product 
+            SET name_product = ?, variant = ?, price = ?, photo_path = ?
+            WHERE articul = ?
+        ''', (name, variant, price, photo_path, articul))
+
+    conn.commit()
+    conn.close()
+
+
+# def update_all_amount():
+#     conn = sqlite3.connect('data/bot_product.db')
+#     cursor = conn.cursor()
+#
+#     # Обновление поля all_amount во всех записях
+#     cursor.execute('''
+#         UPDATE product SET all_amount = 50
+#     ''')
+#
+#     conn.commit()
+#     conn.close()
+
+
+
 def delete_user(user_id):
     conn = sqlite3.connect('data/bot_database.db')
     cursor = conn.cursor()
@@ -53,6 +94,24 @@ def get_user_data(user_id):
     conn.close()
     return user_data if user_data else None
 
+def get_all_amount(articul):
+    conn = sqlite3.connect('data/bot_product.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT all_amount FROM product WHERE articul = ?', (articul,))
+    all_amount = cursor.fetchone()
+    conn.commit()
+    conn.close()
+    return all_amount if all_amount else None
+
+
+def update_all_amount(articul,new_amount):
+    conn = sqlite3.connect('data/bot_product.db')
+    cursor = conn.cursor()
+    # Обновляем all_amount для заданного артикула
+    cursor.execute('UPDATE product SET all_amount = ? WHERE articul = ?',(new_amount,articul))
+    conn.commit()
+    conn.close()
+
 def get_total_price(user_id):
     conn = sqlite3.connect('data/bot_database.db')
     cursor = conn.cursor()
@@ -61,3 +120,29 @@ def get_total_price(user_id):
     conn.commit()
     conn.close()
     return total_price if total_price else None
+
+def get_user_order(user_id):
+    conn = sqlite3.connect('data/bot_users_order.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT id_order, name_product, articul, quantity, price FROM users_order WHERE user_id = ?',(user_id,))
+    total_price = cursor.fetchall()
+    conn.commit()
+    conn.close()
+    return total_price if total_price else None
+
+def set_user_order(user_id, id_order, name_product, articul, variant, quantity, price):
+    conn = sqlite3.connect('data/bot_users_order.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO users_order (
+        user_id,
+        id_order,
+        name_product,
+        articul,
+        variant,
+        quantity,
+        price) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (user_id, id_order, name_product, articul, variant, quantity, price))
+    conn.commit()
+    conn.close()
