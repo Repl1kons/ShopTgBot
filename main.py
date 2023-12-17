@@ -26,6 +26,7 @@ class PaymentState(StatesGroup):
     ASK_CITY = State()
     ASK_STREET = State()
     ASK_HOUSE = State()
+    ASK_APARTMENT = State()
     ASK_INDECS = State()
     CONFIRMATION = State()
 
@@ -49,11 +50,11 @@ async def send_welcome(message: types.Message):
         f"- 🌟 *И многое другое*\n\n" \
         f"*Создано специально для it's my planner | by A-STUDENT!*" \
         f"Вы передали параметр: {start_param}"
-    if message.chat.id == 1066300592:
-        await bot.send_message(message.chat.id,welcome_message,reply_markup = Markup_keyboards.main_menu_admin,
-                               parse_mode = 'Markdown')
-    else:
-        await bot.send_message(message.chat.id, welcome_message, reply_markup = Markup_keyboards.main_menu,
+    # if message.chat.id == 1066300592:
+    #     await bot.send_message(message.chat.id,welcome_message,reply_markup = Markup_keyboards.main_menu_admin,
+    #                            parse_mode = 'Markdown')
+    # else:
+    await bot.send_message(message.chat.id, welcome_message, reply_markup = Markup_keyboards.main_menu,
                                parse_mode = 'Markdown')
     if start_param.isdigit():
         await find_articul.start_articul(bot,message.chat.id,start_param)
@@ -71,28 +72,29 @@ async def my_order(callback_query: types.CallbackQuery):
         current_order_number = None
         item_number = 1
         all_price = 0
-
+        # global all_price
         for order in user_order:
-            # Проверяем, изменился ли номер заказа
             if order[0] != current_order_number:
                 if current_order_number is not None:
-                    orders_text += f"Общая стоимость заказа: {all_price}\nСтатус заказа: Ща приедет скоро че ты\n\n"
+                    orders_text += f"Статус заказа: Создан\n\n"
                 current_order_number = order[0]
                 orders_text += f"*Заказ: {current_order_number}*\n"
                 item_number = 1
-            all_price += order[4]
+                all_price = 0
 
             orders_text += f"{item_number}. Товар: {order[1]}\n" \
                            f"Артикул: {order[2]}\n" \
-                           f"Вариант: {order[3]}\n\n"
+                           f"Вариант: {order[3]}\n" \
+                           f"Кол-во: {order[4]}\n\n"
+            print(order)
 
             item_number += 1
+            all_price += order[5]
 
-        orders_text += f"Общая стоимость заказа: {all_price}\nСтатус заказа: Ща приедет скоро че ты\n"
-        await bot.send_message(callback_query.from_user.id,text = orders_text,
-                               parse_mode = 'Markdown')
+        orders_text += f"Статус заказа: Создан\n"
+        await bot.send_message(callback_query.from_user.id,text = orders_text, parse_mode = 'Markdown', reply_markup = Inline_keyboard.returnProfil)
     else:
-        await bot.send_message(callback_query.message.chat.id, "Похоже вы еще не сделали ни одного заказа🤨")
+        await bot.send_message(callback_query.message.chat.id, "Похоже вы еще не сделали ни одного заказа🤨", reply_markup = Inline_keyboard.returnProfil)
 
 @dp.message_handler(lambda message: message.text == "Админ епт")
 async def adminMod(message: types.Message):
@@ -121,7 +123,7 @@ async def profil_user(message: types.Message):
                 f"├ <i>Дом:</i> {user_data[4]}\n"\
                 f"└ <i>Индекс:</i> {user_data[5]}"
 
-        await bot.send_message(message.from_user.id, text = text, reply_markup = Inline_keyboard.profil_data_1,  # Передал в отдельную строку для ясности
+        await bot.send_message(message.from_user.id, text = text, reply_markup = Inline_keyboard.profil_data_1,
         parse_mode = 'HTML')
 
 
@@ -129,6 +131,10 @@ async def profil_user(message: types.Message):
         await bot.send_message(user_id,
                                f"Здравствуйте {message.from_user.username} 👋\nВ данный момент вы не зарегистрированы в боте. Вы можете начать регистрироваться сейчас.",
                                reply_markup = Inline_keyboard.not_profil_data)
+
+@dp.callback_query_handler(lambda c: c.data == 'returnProfil')
+async def callback_handler(callback_query: types.CallbackQuery):
+    await profil_user(callback_query)
 
 @dp.message_handler(state = catalog.ArticulForm.articul_numb)
 async def start_profile(message: types.Message, state: FSMContext):
@@ -187,6 +193,13 @@ async def start_profile(message: types.Message, state: FSMContext):
         await profil_register.get_house_numb(bot, message, state)
         await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
 
+@dp.message_handler(state = profil_register.ProfilState.GET_APARTMENT)
+async def start_profile(message: types.Message, state: FSMContext):
+    async with state.proxy() as profil_data:
+        profil_data["apartment"] = message.text
+        await profil_register.get_apartment(bot, message, state)
+        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+
 
 @dp.message_handler(state = profil_register.ProfilState.GET_INDECS)
 async def start_profile(message: types.Message, state: FSMContext):
@@ -201,6 +214,7 @@ async def start_profile(message: types.Message, state: FSMContext):
                                f"Город: {profil_data['city']}\n"
                                f"Улица: {profil_data['street']}\n"
                                f"Дом: {profil_data['house']}\n"
+                               f"Квартира: {profil_data['apartment']}\n"
                                f"Индекс: {profil_data['indecs']}",
                                reply_markup = Inline_keyboard.user_data_1)
 
@@ -234,7 +248,7 @@ async def process_data_edit(callback_query: types.CallbackQuery):
 async def create_info_user(message: types.Message):
     await PaymentState.ASK_NAME.set()
     global message_id
-    message_id = (await bot.send_message(message.from_user.id, "Введите ваше имя в формате ФИО:")).message_id
+    message_id = (await bot.send_message(message.from_user.id, "Введите ваше имя в формате ФИО:\nАккуратней, я очень чувствителен к формату")).message_id
 
 
 @dp.message_handler(lambda message: message.text == '🛍 Каталог')
@@ -265,7 +279,7 @@ async def start_payment_process(callback_query: types.CallbackQuery):
     if user_data:
         await bot.send_message(
             callback_query.from_user.id,
-            text = f"*Ваши текущие данные:*\n\n*Имя:*\n{user_data[0]}\n\n*Адрес:*\n{user_data[2]} обл., г.{user_data[1]}, ул.{user_data[3]},{user_data[4]}\nИндекс: {user_data[5]}",
+            text = f"*Ваши текущие данные:*\n\n*Имя:*\n{user_data[0]}\n\n*Адрес:*\n{user_data[2]} обл., г.{user_data[1]}, ул.{user_data[3]},{user_data[4]}., {user_data[5]}\nИндекс: {user_data[6]}",
             reply_markup = Inline_keyboard.confirmation_keyboard,
             parse_mode = 'Markdown'
         )
@@ -273,7 +287,7 @@ async def start_payment_process(callback_query: types.CallbackQuery):
     else:
         await PaymentState.ASK_NAME.set()
         global message_id
-        message_id = (await bot.send_message(callback_query.from_user.id, "Введите ваше имя в формате ФИО: ")).message_id
+        message_id = (await bot.send_message(callback_query.from_user.id, "Введите ваше имя в формате ФИО:\nАккуратней, я очень чувствителен к формату ")).message_id
 
 
 @dp.callback_query_handler(lambda c: c.data == 'change_data', state = '*')
@@ -283,7 +297,7 @@ async def change_data(callback_query: types.CallbackQuery, state: FSMContext):
         database.delete_user(callback_query.from_user.id)
         await PaymentState.ASK_NAME.set()
         global message_id
-        message_id = (await bot.send_message(callback_query.from_user.id, "Введите ваше имя в формате ФИО: ")).message_id
+        message_id = (await bot.send_message(callback_query.from_user.id, "Введите ваше имя в формате ФИО:\nАккуратней, я очень чувствителен к формату")).message_id
     except Exception as e:
         print(f"Ошибка: {e}")
 
@@ -295,7 +309,7 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
     await state.finish()
 
     user_id = callback_query.from_user.id
-    conn = sqlite3.connect('data/bot_database.db')
+    conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
 
     query = "SELECT item_name, articul, selected_variant, quantity, price FROM cart_items WHERE user_id = ?"
@@ -345,7 +359,8 @@ async def edit_cart(message: types.Message, state: FSMContext):
 async def process_name(message: types.Message, state: FSMContext):
     global message_id
     async with state.proxy() as data:
-        data['name'] = message.text
+        if len(message.text.split()) == 3:
+            data['name'] = message.text
     await PaymentState.next()
     await bot.edit_message_text(chat_id = message.from_user.id, message_id = message_id, text = "Теперь введите область:")
     await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
@@ -392,9 +407,19 @@ async def process_street(message: types.Message, state: FSMContext):
         data['house'] = message.text
     await PaymentState.next()
     await bot.edit_message_text(chat_id = message.from_user.id, message_id = message_id,
-                                text = "И наконец, введите индекс")
+                                text = "Теперь введите номер квартиры")
     await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
 
+
+@dp.message_handler(state = PaymentState.ASK_APARTMENT)
+async def process_street(message: types.Message, state: FSMContext):
+    global message_id
+    async with state.proxy() as data:
+        data['apartment'] = message.text
+    await PaymentState.next()
+    await bot.edit_message_text(chat_id = message.from_user.id, message_id = message_id,
+                                text = "И наконец, введите индекс")
+    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
 
 @dp.message_handler(state = PaymentState.ASK_INDECS)
 async def process_house(message: types.Message, state: FSMContext):
@@ -404,7 +429,7 @@ async def process_house(message: types.Message, state: FSMContext):
     await PaymentState.next()
     await bot.edit_message_text(chat_id = message.from_user.id, message_id = message_id,
                                 text = f"Пожалуйста, подтвердите введенные данные."
-                                       f"\n\nИмя: {data['name']}\nОбласть: {data['region']}\nГород: {data['city']}\nУлица: {data['street']}\nДом: {data['house']}\nИндекс: {data['indecs']}",
+                                       f"\n\nИмя: {data['name']}\nОбласть: {data['region']}\nГород: {data['city']}\nУлица: {data['street']}\nДом: {data['house']}\nКвартира: {data['apartment']}\nИндекс: {data['indecs']}",
                                 reply_markup = Inline_keyboard.user_data)
     await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
 
@@ -421,6 +446,7 @@ async def process_data_enter(callback_query: types.CallbackQuery, state: FSMCont
             region = data['region'],
             street = data['street'],
             number_house = data['house'],
+            apartment = data['apartment'],
             indecs = data['indecs']
         )
 
@@ -430,7 +456,7 @@ async def process_data_enter(callback_query: types.CallbackQuery, state: FSMCont
 
     await state.finish()
 
-    conn = sqlite3.connect('data/bot_database.db')
+    conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
 
     query = "SELECT item_name, articul, selected_variant, quantity, price FROM cart_items WHERE user_id = ?"
@@ -513,50 +539,37 @@ async def successful_payment(message: types.Message):
 
     user_data = database.get_user_data(user_id)
     if user_data:
-        user_info = f"*Данные пользователя:*\nИмя: {user_data[0]}\nОбласть: {user_data[2]}\nГород: {user_data[1]}\nУлица: {user_data[3]}\nДом: {user_data[4]}\nИндекс: {user_data[5]}"
+        user_info = f"*Данные пользователя:*\nИмя: {user_data[0]}\nОбласть: {user_data[2]}\nГород: {user_data[1]}\nУлица: {user_data[3]}\nДом: {user_data[4]}\nКвартира: {user_data[5]}\nИндекс: {user_data[6]}"
     else:
         user_info = "Информация о пользователе не найдена."
 
     # Извлечение данных о заказе
-    conn = sqlite3.connect('data/bot_database.db')
+    conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
     cursor.execute(
         "SELECT item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?", (user_id,))
     orders = cursor.fetchall()
     conn.close()
 
-    last_order = orders[-1]
+    last_order = orders
     orders_info = ''
     all_price = 0
     item_number = 1
 
     # Информация о последнем заказе
-    current_order_number = last_order[0]
-    orders_info += f"*Заказ: {current_order_number}*\n"
-    # Отправление сообщение админу с покупкой
-    orders_info = "*Детали заказа:*\n"
-    for order in orders:
-        if order[0] == current_order_number:
-            all_price += order[4]
-            orders_info += f"{item_number}. Товар: {order[1]}\n" \
-                           f"Артикул: {order[2]}\n" \
-                           f"Вариант: {order[3]}\n\n"
-            item_number += 1
 
-        # Добавляем информацию о стоимости и статусе последнего заказа
-    orders_info += f"Общая стоимость заказа: {all_price}\nСтатус заказа: Ща приедет скоро че ты\n"
-    # Отправка информации пользователю
-    await bot.send_message(1066300592, f"{user_info}\n\n{orders_info}", parse_mode = 'Markdown')
 
 
     id_order = random.randint(1000,2000)
     order_info = f"*Платеж прошел успешно*\nЗаказ номер {id_order}:\n"
-
+    # amount_price_1 = 0
     for item in orders:
         print(item)
-        amount_price_1 = item[3] * item[4]
+        # all_price_one_order = item[3] * item[4]
         selected_category = item[5]
-        order_info += f"*Товар:* {item[0]}\nАртикул: {item[1]}\nКатегория: {selected_category}\nВариант: {item[2]}\nКоличество: {item[3]}\nОбщая стоимость заказа: {amount_price_1}\n\n"
+        # amount_price_1 += all_price_one_order
+        order_info += f"*Товар:* {item[0]}\nАртикул: {item[1]}\nКатегория: {selected_category}\nВариант: {item[2]}\nКоличество: {item[3]}\n\n"
+
 
     for item in orders:
         print(item)
@@ -564,6 +577,25 @@ async def successful_payment(message: types.Message):
         selected_category = item[5]
         database.set_user_order(user_id, id_order, item[0], item[1], item[2], item[3], amount_price_1)
     await bot.send_message(user_id,f"{order_info}",parse_mode = 'Markdown')
+
+    current_order_number = database.get_user_order_order_id(id_order)
+    orders_info += f"*Заказ: {current_order_number[0]}*\n"
+    # Отправление сообщение админу с покупкой
+    orders_info = f"*Детали заказа {id_order}*\n"
+    for order in current_order_number:
+            # all_price = order[4]
+            orders_info += f"Товар: {order[0]}\n" \
+                           f"Артикул: {order[1]}\n" \
+                           f"Вариант: {order[2]}\n" \
+                           f"Кол-во: {order[3]}\n\n"
+            item_number += 1
+            # all_price += order[4]
+
+        # Добавляем информацию о стоимости и статусе последнего заказа
+    orders_info += f"Статус заказа: Ща приедет скоро че ты\n"
+    # Отправка информации пользователю
+    await bot.send_message(1066300592, f"{user_info}\n\n{orders_info}", parse_mode = 'Markdown')
+
     await corsina.clear_user_cart(user_id)
 
 

@@ -104,26 +104,21 @@ async def process_callback(bot, callback_query):
         amount_def = all_amount
         all_amount -= amount
         data.db.database.update_all_amount(articul,all_amount)
+        price = data.db.database.get_price(articul)
+        all_price = 0
         if amount_def > 0:
             for pattern, price in grouped_prices.items():
                 if re.match(pattern,articul):
-
                         await corsina.add_to_cart(callback_query.message.chat.id,cat_name,articul,current_image_index + 1,amount,price, category_numb)
                         print(f"{cat_name}, {category} {category_numb}")
                         await data.db.database.add_product(articul, cat_name, current_image_index + 1, price, photo_path)
                         print(f"PATH: {photo_path}")
+                        all_price += price * amount
+
             await bot.send_message(callback_query.message.chat.id,
-                                   f"Товар {cat_name}:\n\nАртикул: {articul}\nВыбранный вариант: {current_image_index + 1}\nКоличество: {amount}\nЦена: {price * amount}\n\nБыл успешно добавлен в корзину 💵‍",
+                                   f"Товар {cat_name}:\n\nАртикул: {articul}\nВыбранный вариант: {current_image_index + 1}\nКоличество: {amount}\nЦена: {all_price}\n\nБыл успешно добавлен в корзину 💵‍",
                                    reply_markup = Inline_keyboard.show_basket_add)
 
-
-                # else:
-                #     await bot.send_message(callback_query.message.chat.id,f"Товар {cat_name}:\n\nАртикул: {articul}\nВыбранный вариант: {current_image_index + 1}\nКоличество: {amount}\nЦена: {price * amount}\n\nБыл успешно добавлен в корзину 💵‍", reply_markup = Inline_keyboard.show_basket_add)
-
-
-                # print(f"Осталось: {all_amount_prod[0]}")
-
-    # photo_path = os.path.join(path_dir, images[current_image_index])
     all_amount_prod = data.db.database.get_all_amount(articul)
     print(f"art: {articul}")
     if all_amount_prod[0] > 0:

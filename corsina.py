@@ -8,7 +8,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 async def add_to_cart(user_id, item_name, articul, selected_variant, quantity, price, selected_category):
-    conn = sqlite3.connect('data/bot_database.db')  # Подключение к базе данных
+    conn = sqlite3.connect('data/user_corsina.db')  # Подключение к базе данных
     cursor = conn.cursor()
 
     # SQL-команда для добавления товара в корзину
@@ -25,7 +25,7 @@ async def add_to_cart(user_id, item_name, articul, selected_variant, quantity, p
 async def show_cart(bot, message: types.Message):
 
     user_id = message.from_user.id
-    conn = sqlite3.connect('data/bot_database.db')
+    conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
 
     query = "SELECT item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
@@ -59,13 +59,21 @@ async def item_number_received(bot, message: types.Message,state: FSMContext):
     user_id = message.from_user.id
     item_number = message.text.strip()
 
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+
+    query = "SELECT item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
+    cursor.execute(query,(user_id,))
+    cart_items = cursor.fetchall()
+    conn.close()
+
     if not item_number.isdigit():
         await message.answer("Пожалуйста, введите числовой номер товара.")
         return
 
     item_number = int(item_number) - 1  # Переводим в индекс массива (начинается с 0)
 
-    conn = sqlite3.connect('data/bot_database.db')
+    conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
 
     # Получение товара по номеру
@@ -73,11 +81,18 @@ async def item_number_received(bot, message: types.Message,state: FSMContext):
     rows = cursor.fetchall()
 
     if item_number < 0 or item_number >= len(rows):
-        await message.answer("Товар с таким номером не найден.")
+        await CartEditState.awaiting_item_number.set()
+        await message.answer("Товар с таким номером не найден. Введите корректный номер")
     else:
-        item_id = rows[item_number][0]
-        cursor.execute("DELETE FROM cart_items WHERE id = ?",(item_id,))
-        conn.commit()
+        for item in cart_items:
+            articul = item[1]
+            amount = item[3]
+            now_amount = data.db.database.get_all_amount(articul)
+            new_amount = amount + now_amount[0]
+            data.db.database.update_all_amount(articul, new_amount)
+            item_id = rows[item_number][0]
+            cursor.execute("DELETE FROM cart_items WHERE id = ?",(item_id,))
+            conn.commit()
         await bot.delete_message(message.chat.id, message.message_id)
         await show_cart(bot, message)
 
@@ -85,31 +100,40 @@ async def item_number_received(bot, message: types.Message,state: FSMContext):
     await state.finish()
 
 
+
 async def clear_user_cart(user_id):
     """ Функция для очистки корзины пользователя в базе данных """
-    conn = sqlite3.connect('data/bot_database.db')
+    conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
     cursor.execute("DELETE FROM cart_items WHERE user_id = ?", (user_id,))
     conn.commit()
     conn.close()
 
-#
-# async def process_callback(bot, callback_query):
-#     global message_id
-#     if callback_query.data == 'clear_cart':
-#         await clear_user_cart(callback_query.message.chat.id)
-#         await bot.edit_message_text(chat_id = callback_query.message.chat.id,message_id = message_id, text = "👻 Пока что тут пусто 😢")
-    # if callback_query.data == "edit_cart":
 
 async def process_callback(bot, callback_query: types.CallbackQuery, state):
     user_id = callback_query.from_user.id
 
     if callback_query.data == 'edit_cart':
         await CartEditState.awaiting_item_number.set()
-        await bot.delete_message(user_id, callback_query.message.message_id)
+        # await bot.delete_message(user_id, callback_query.message.message_id) # удаление сообщения с содержимым корзины
         await bot.send_message(user_id, "Введите номер товара для удаления:\n\nИли нажмите на кнопку что бы вернуться назад", reply_markup = Inline_keyboard.show_basket_add)
 
     elif callback_query.data == 'clear_cart':
+        conn = sqlite3.connect('data/user_corsina.db')
+        cursor = conn.cursor()
+
+        query = "SELECT item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
+        cursor.execute(query,(user_id,))
+        cart_items = cursor.fetchall()
+        conn.close()
+
+        for item in cart_items:
+            articul = item[1]
+            amount = item[3]
+            now_amount = data.db.database.get_all_amount(articul)
+            new_amount = amount + now_amount[0]
+            data.db.database.update_all_amount(articul, new_amount)
+
         await clear_user_cart(user_id)
         await bot.edit_message_text(chat_id=user_id, message_id=callback_query.message.message_id, text="👻 Ваша корзина теперь пуста 😢")
 

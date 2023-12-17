@@ -7,6 +7,10 @@ edit_basket = InlineKeyboardButton(text = '✏ Изменить', callback_data 
 payment_button = InlineKeyboardButton(text = '💳 Оплатить', callback_data = 'payment')
 keyboard_basket.add(clear_button, edit_basket, payment_button)
 
+returnProfil = InlineKeyboardMarkup()
+returnProfilButton = InlineKeyboardButton(text = 'Назад', callback_data = 'returnProfil')
+returnProfil.add(returnProfilButton)
+
 show_basket_add = InlineKeyboardMarkup()
 show_basket = InlineKeyboardButton(text = '📦🛒 К корзине', callback_data = 'show_basket')
 show_basket_add.add(show_basket)
@@ -95,7 +99,7 @@ confirmation_keyboard = InlineKeyboardMarkup(row_width = 2).add(
     InlineKeyboardButton(text = '✏ Изменить', callback_data = 'change_data'),
     InlineKeyboardButton(text = '✅ Подтвердить', callback_data = 'confirm_data'))
 
-profile_data_return = InlineKeyboardButton(text = "К выбору товаров", callback_data = 'return_profile')
+profile_data_return = InlineKeyboardButton(text = "🛍 Каталог", callback_data = 'return_profile')
 
 profil_data_edit = InlineKeyboardButton(text = '✏ Изменить', callback_data = 'change_data')
 profil_data = InlineKeyboardMarkup().add(profil_data_edit)

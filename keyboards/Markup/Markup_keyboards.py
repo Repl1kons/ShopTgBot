@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 
 """Главное меню"""
-main_menu = ReplyKeyboardMarkup(resize_keyboard=True, input_field_placeholder = "Выберите действия из меню")
+main_menu = ReplyKeyboardMarkup(resize_keyboard=True)
 catalog = KeyboardButton("🛍 Каталог")
 korzina = KeyboardButton("🛒 Корзина")
 profil = KeyboardButton("👨Профиль")

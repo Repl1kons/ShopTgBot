@@ -1,7 +1,7 @@
 import sqlite3
 
 # def create_database_user_info():
-#     conn = sqlite3.connect('bot_database.db')
+#     conn = sqlite3.connect('user_corsina.db')
 #     cursor = conn.cursor()
 #
 #     cursor.execute('''
@@ -12,6 +12,7 @@ import sqlite3
 #             region TEXT,
 #             street TEXT,
 #             number_house TEXT,
+#             apartment TEXT,
 #             indecs TEXT
 #         )
 #     ''')
@@ -61,7 +62,7 @@ def create_database_users_order():
     cursor.execute('''
             CREATE TABLE IF NOT EXISTS users_order (
                 user_id INTEGER,
-                id_order INTEGER, 
+                id_order INTEGER,
                 name_product TEXT,
                 articul INTEGER,
                 variant INTEGER,
