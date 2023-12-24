@@ -1,10 +1,56 @@
 from aiogram import types, Dispatcher
+from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 
 import data.db.database
+from data.db import database
 from keyboards.Inline import Inline_keyboard
 import sqlite3
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+
+def create_cart_keyboard(user_id):
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, item_name, quantity, articul FROM cart_items WHERE user_id = ?", (user_id,))
+    cart_items = cursor.fetchall()
+    conn.close()
+    if cart_items:
+        keyboard = InlineKeyboardMarkup(row_width=3)
+        all_amount = database.get_all_amount(cart_items[0][3])
+        print(f"Всего: {all_amount}")
+        for item_id, item_name, quantity, articul in cart_items:
+
+            keyboard.insert(InlineKeyboardButton(text=f"{item_name} | {articul} | {quantity} шт.", callback_data=f'corzina_{item_id}'))
+
+            keyboard.add(
+                InlineKeyboardButton(text="- 1", callback_data=f"corzinaEditMin_{item_id}"),
+                InlineKeyboardButton(text="Удалить", callback_data=f"corzinaEditDel_{item_id}"),
+                InlineKeyboardButton(text = "+ 1",callback_data = f"corzinaEditSum_{item_id}"))
+        keyboard.add(InlineKeyboardButton(text = "Назад", callback_data = "show_basket"))
+        return keyboard
+
+def create_cart_edit_message(user_id):
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+    welcome_message = '● Товары:'
+    total_price = 0
+    item_number = 1
+
+    query = "SELECT id, item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
+    cursor.execute(query,(user_id,))
+    cart_items = cursor.fetchall()
+    conn.close()
+
+    if cart_items:
+        for item in cart_items:
+            amount_price = item[4] * item[5]
+            total_price += amount_price
+            welcome_message += f"\n\n*{item[1]}*\n ┄ Артикул: {item[2]}\n ┄ Вариант: {item[3]}\n{item[4]} шт. x {int(item[5])} ₽ = {int(amount_price)} ₽\n———"
+            item_number += 1
+
+        # welcome_message += "● Итого: "
+
+        return welcome_message
 
 
 async def add_to_cart(user_id, item_name, articul, selected_variant, quantity, price, selected_category):
@@ -33,71 +79,130 @@ async def show_cart(bot, message: types.Message):
     cart_items = cursor.fetchall()
     conn.close()
 
-    cart_contents = ""
+    cart_contents = '● Товары:\n'
     total_price = 0
     item_number = 1
+    all_order_price = 0
+    all_quantity = 0
 
     for item in cart_items:
         amount_price = item[3] * item[4]
         total_price += amount_price
-        cart_contents += f"{item_number}. *Товар:* {item[0]}\nАртикул: {item[1]}\nВариант: {item[2]}\nКоличество: {item[3]}\nЦена за единицу: {item[4]}\nОбщая цена: {amount_price}\n\n"
-        item_number += 1  # Увеличиваем счетчик для следующего товара
+        cart_contents += f"\n*{item[0]}*\n _┄ Артикул:_ {item[1]}\n ┄ _Вариант:_ {item[2]}\n" \
+                         f"{item[3]} шт. x {int(item[4])} ₽ = {int(amount_price)}" \
+                         f" ₽\n———\n"
+        item_number += 1
+        all_quantity += item[3]
+    all_order_price += total_price
+    cart_contents += f'\n● Итого:\n ┄ {all_quantity} шт. товаров на {int(all_order_price)} ₽\n ┄ Доставка: 300 ₽\n\n'
+    print(all_order_price)
     global message_id
-    if cart_contents:
-        cart_contents += f"Доставка: 300 руб\n*Всего к оплате: {total_price + 300} руб.*"
-        message_id = (await bot.send_message(user_id, f"*🛒 Ваша Корзина*\n\n{cart_contents}", reply_markup=Inline_keyboard.keyboard_basket, parse_mode='Markdown')).message_id
+    if cart_items:
+        cart_contents += f"*Всего к оплате: {int(total_price + 300)} руб.*"
+        message_id = (await bot.send_message(user_id, f"{cart_contents}", reply_markup=Inline_keyboard.keyboard_basket, parse_mode='Markdown')).message_id
     else:
         message_id = (await bot.send_message(user_id, "👻 Ваша корзина пуста 😢")).message_id
 
 
 
-class CartEditState(StatesGroup):
-    awaiting_item_number = State()
-
-
-async def item_number_received(bot, message: types.Message,state: FSMContext):
-    user_id = message.from_user.id
-    item_number = message.text.strip()
-
+async def edit_cart(bot, message: types.Message):
+    keyboard = create_cart_keyboard(message.from_user.id)
+    current_order_number = None
     conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
 
-    query = "SELECT item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
-    cursor.execute(query,(user_id,))
+    query = "SELECT id, item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
+    cursor.execute(query,(message.from_user.id,))
     cart_items = cursor.fetchall()
     conn.close()
 
-    if not item_number.isdigit():
-        await message.answer("Пожалуйста, введите числовой номер товара.")
-        return
+    if cart_items:
+        welcome_message = create_cart_edit_message(message.from_user.id)
 
-    item_number = int(item_number) - 1  # Переводим в индекс массива (начинается с 0)
+        global message_id
+        message_id = (await bot.send_message(message.from_user.id, welcome_message, reply_markup=keyboard, parse_mode='Markdown')).message_id
+    else:
+        await bot.send_message(message.from_user.id, "Ваша корзина пуста")
+
+async def edit_cart_Delete(bot, callback_query: types.CallbackQuery, corzinaEdit):
+    global message_id
+
 
     conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
 
     # Получение товара по номеру
-    cursor.execute("SELECT id FROM cart_items WHERE user_id = ? ORDER BY id",(user_id,))
+    cursor.execute("SELECT quantity, articul, item_name, selected_variant, price FROM cart_items WHERE id = ?",(corzinaEdit,))
     rows = cursor.fetchall()
 
-    if item_number < 0 or item_number >= len(rows):
-        await CartEditState.awaiting_item_number.set()
-        await message.answer("Товар с таким номером не найден. Введите корректный номер")
-    else:
-        for item in cart_items:
-            articul = item[1]
-            amount = item[3]
-            now_amount = data.db.database.get_all_amount(articul)
-            new_amount = amount + now_amount[0]
-            data.db.database.update_all_amount(articul, new_amount)
-            item_id = rows[item_number][0]
-            cursor.execute("DELETE FROM cart_items WHERE id = ?",(item_id,))
-            conn.commit()
-        await bot.delete_message(message.chat.id, message.message_id)
-        await show_cart(bot, message)
+    show_catalogs = InlineKeyboardMarkup(row_width=3)
+    if rows:
 
+        now_all_amount = database.get_all_amount(rows[0][1])
+        new_all_amount = now_all_amount[0] + rows[0][0]
+        print(new_all_amount)
+        database.update_all_amount(rows[0][1], new_all_amount)
+        database.delete_order_corsina(corzinaEdit)
+        new_keyboard = create_cart_keyboard(callback_query.from_user.id)
+        welcome_message = create_cart_edit_message(callback_query.from_user.id)
+
+        # welcome_message += '———\n'
+        await bot.edit_message_text(chat_id=callback_query.message.chat.id, text=welcome_message, message_id=message_id, reply_markup=new_keyboard, parse_mode='Markdown')
+    else:
+        await bot.edit_message_text(chat_id=callback_query.message.chat.id, text="К сожалению вы еще не сделали покупки", message_id=message_id, reply_markup=show_catalogs, parse_mode='Markdown')
+
+async def edit_cart_amount_Sum(bot, callback_query: types.CallbackQuery, corzinaEdit):
+    global message_id
+
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+
+    # Получение товара по номеру
+    cursor.execute("SELECT quantity, articul, item_name, selected_variant, price FROM cart_items WHERE id = ?", (corzinaEdit,))
+    rows = cursor.fetchall()
+    conn.commit()
     conn.close()
-    await state.finish()
+
+    if rows:
+        for item in rows:
+
+            now_amount = item[0]
+            new_amount = now_amount + 1
+            database.update_all_amount_corzina(corzinaEdit, new_amount)
+        welcome_message = create_cart_edit_message(callback_query.from_user.id)
+        # welcome_message += '———\n'
+        new_keyboard = create_cart_keyboard(callback_query.from_user.id)
+        await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                    text=welcome_message, message_id=message_id,
+                                    reply_markup=new_keyboard, parse_mode='Markdown')
+
+
+async def edit_cart_amount_Min(bot, callback_query: types.CallbackQuery, corzinaEdit):
+    welcome_message = '● Товары:'
+    total_price = 0
+    item_number = 1
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+
+    # Получение товара по номеру
+    cursor.execute("SELECT quantity, articul, item_name, selected_variant, price FROM cart_items WHERE id = ?", (corzinaEdit,))
+    rows = cursor.fetchall()
+    conn.commit()
+    conn.close()
+
+    if rows and rows[0][0] > 1:
+        for item in rows:
+
+
+            now_amount = item[0]
+            new_amount = now_amount - 1
+            database.update_all_amount_corzina(corzinaEdit, new_amount)
+        welcome_message = create_cart_edit_message(callback_query.from_user.id)
+        # welcome_message += '———\n'
+        new_keyboard = create_cart_keyboard(callback_query.from_user.id)
+        await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                    text=welcome_message, message_id=message_id,
+                                    reply_markup=new_keyboard, parse_mode='Markdown')
 
 
 
@@ -110,13 +215,15 @@ async def clear_user_cart(user_id):
     conn.close()
 
 
-async def process_callback(bot, callback_query: types.CallbackQuery, state):
+async def process_callback(bot, callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
 
     if callback_query.data == 'edit_cart':
-        await CartEditState.awaiting_item_number.set()
         # await bot.delete_message(user_id, callback_query.message.message_id) # удаление сообщения с содержимым корзины
-        await bot.send_message(user_id, "Введите номер товара для удаления:\n\nИли нажмите на кнопку что бы вернуться назад", reply_markup = Inline_keyboard.show_basket_add)
+        await edit_cart(bot, callback_query)
+
+    elif callback_query.data == 'show_basket':
+        await show_cart(bot, callback_query)
 
     elif callback_query.data == 'clear_cart':
         conn = sqlite3.connect('data/user_corsina.db')
@@ -132,16 +239,9 @@ async def process_callback(bot, callback_query: types.CallbackQuery, state):
             amount = item[3]
             now_amount = data.db.database.get_all_amount(articul)
             new_amount = amount + now_amount[0]
-            data.db.database.update_all_amount(articul, new_amount)
+            data.db.database.update_all_amount(articul,new_amount)
 
         await clear_user_cart(user_id)
-        await bot.edit_message_text(chat_id=user_id, message_id=callback_query.message.message_id, text="👻 Ваша корзина теперь пуста 😢")
-
-    elif callback_query.data == 'show_basket':
-        await state.finish()
-        await show_cart(bot, callback_query)
-
-# def register_handlers():
-#     dp.register_callback_query_handler(process_callback, lambda c: c.data in ['edit_cart', 'clear_cart'], state='*')
-#     dp.register_message_handler(item_number_received, state=CartEditState.awaiting_item_number)
+        await bot.edit_message_text(chat_id = user_id,message_id = callback_query.message.message_id,
+                                    text = "👻 Ваша корзина теперь пуста 😢")
 

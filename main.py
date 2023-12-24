@@ -13,7 +13,7 @@ import corsina
 from catalog import handle_catalog_button, show_category_products  # Импортируем новый обработчик
 import photo_handler
 import photo_hendler_two
-from aiogram.types import ContentTypes
+from aiogram.types import ContentTypes,InlineKeyboardMarkup,InlineKeyboardButton
 from keyboards.Markup import Markup_keyboards
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
@@ -48,9 +48,9 @@ async def send_welcome(message: types.Message):
         f"- ✒️ *Уникальные обложки*\n" \
         f"- 📘 *Стильные ежедневники*\n" \
         f"- 🌟 *И многое другое*\n\n" \
-        f"*Создано специально для it's my planner | by A-STUDENT!*" \
-        f"Вы передали параметр: {start_param}"
-    # if message.chat.id == 1066300592:
+        f"*Создано специально для it's my planner | by A-STUDENT!*"
+        # f"Вы передали параметр: {start_param}"
+    # if message.chat.id == config.IS_ADMIN:
     #     await bot.send_message(message.chat.id,welcome_message,reply_markup = Markup_keyboards.main_menu_admin,
     #                            parse_mode = 'Markdown')
     # else:
@@ -64,37 +64,105 @@ async def handle_help(message: types.Message):
     await bot.send_message(message.chat.id,
                            "Если у вас есть вопросы по поводу работе бота или другая информация - напишите нам\n https://t.me/Garnlzerx")
 
-@dp.callback_query_handler(lambda c: c.data == 'myOrder')
+@dp.callback_query_handler(lambda c: c.data in ['myOrder', 'return_order'])
 async def my_order(callback_query: types.CallbackQuery):
-    user_order = database.get_user_order(callback_query.from_user.id)
+    await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+    global show_order_message
+    print("MyOrder")
+    if callback_query.from_user.id == config.ID_ADMIN:
+        user_order = database.get_all_user_order()
+    else:
+        user_order = database.get_user_order(callback_query.from_user.id)
     if user_order:
-        orders_text = ''
         current_order_number = None
-        item_number = 1
-        all_price = 0
-        # global all_price
+        show_order = InlineKeyboardMarkup(row_width = 1)
         for order in user_order:
             if order[0] != current_order_number:
-                if current_order_number is not None:
-                    orders_text += f"Статус заказа: Создан\n\n"
+                order_button = InlineKeyboardButton(text = order[0],callback_data = f'order_{order[0]}')
+                show_order.add(order_button)
                 current_order_number = order[0]
-                orders_text += f"*Заказ: {current_order_number}*\n"
-                item_number = 1
-                all_price = 0
+        returnProfilButton = InlineKeyboardButton(text = 'Назад',callback_data = 'returnProfil')
+        show_order.add(returnProfilButton)
 
-            orders_text += f"{item_number}. Товар: {order[1]}\n" \
-                           f"Артикул: {order[2]}\n" \
-                           f"Вариант: {order[3]}\n" \
-                           f"Кол-во: {order[4]}\n\n"
-            print(order)
 
-            item_number += 1
-            all_price += order[5]
-
-        orders_text += f"Статус заказа: Создан\n"
-        await bot.send_message(callback_query.from_user.id,text = orders_text, parse_mode = 'Markdown', reply_markup = Inline_keyboard.returnProfil)
+        # global all_price
+        # for order in user_order:
+        #     if order[0] != current_order_number:
+        #         if current_order_number is not None:
+        #             orders_text += f"Статус заказа: Создан\n\n"
+        #         current_order_number = order[0]
+        #         orders_text += f"*Заказ: {current_order_number}*\n"
+        #         item_number = 1
+        #         all_price = 0
+        #
+        #     orders_text += f"{item_number}. Товар: {order[1]}\n" \
+        #                    f"Артикул: {order[2]}\n" \
+        #                    f"Вариант: {order[3]}\n" \
+        #                    f"Кол-во: {order[4]}\n\n"
+        #     print(order)
+        #
+        #     item_number += 1
+        #     all_price += order[5]
+        #
+        # orders_text += f"Статус заказа: Создан\n"
+        show_order_message = (await bot.send_message(callback_query.from_user.id,text = f"*Выберите номер заказа для просмотра*\n\n", parse_mode = 'Markdown', reply_markup = show_order)).message_id
     else:
         await bot.send_message(callback_query.message.chat.id, "Похоже вы еще не сделали ни одного заказа🤨", reply_markup = Inline_keyboard.returnProfil)
+
+@dp.callback_query_handler(lambda c: c.data.startswith('order'))
+async def handle_category_choice(callback_query: types.CallbackQuery):
+
+    global show_order_message
+    text_order_info = ''
+    global order
+    order = callback_query.data.split('_')[1]
+    order_info = database.get_user_order_order_id(order)
+    text_order_info += f"*Заказ: {order}*\n\n"
+    item_number = 1
+    show_order = InlineKeyboardMarkup(row_width = 1)
+
+
+    for order_inf in order_info:
+        text_order_info += f"{item_number}. Товар: {order_inf[0]}\n" \
+                       f"Артикул: {order_inf[1]}\n" \
+                       f"Вариант: {order_inf[2]}\n" \
+                       f"Кол-во: {order_inf[3]}\n\n"
+        item_number += 1
+        status = order_inf[5]
+        user_id = order_inf[6]
+    user_data = database.get_user_data(user_id)
+    if callback_query.from_user.id == config.ID_ADMIN:
+        if user_data:
+            text_order_info += f"*Данные пользователя:*\nИмя: {user_data[0]}\nОбласть: {user_data[2]}\nГород: {user_data[1]}\nУлица: {user_data[3]}\nДом: {user_data[4]}\nКвартира: {user_data[5]}\nИндекс: {user_data[6]}"
+        returnOrderButton = InlineKeyboardButton(text = 'Назад',callback_data = 'return_order')
+        order_button = InlineKeyboardButton(text = "Установить статус",callback_data = f'set_status')
+        show_order.add(order_button)
+        show_order.insert(returnOrderButton)
+        await bot.edit_message_text(chat_id = callback_query.message.chat.id, message_id = show_order_message, text = text_order_info, parse_mode = 'Markdown', reply_markup = show_order) # Inline_keyboard.returnOrder
+    else:
+        text_order_info += f"Статус заказа: {status}\n"
+        await bot.edit_message_text(chat_id = callback_query.message.chat.id, message_id = show_order_message, text = text_order_info, parse_mode = 'Markdown', reply_markup = Inline_keyboard.returnOrder)
+    # await show_category_products(bot, callback_query.message.chat.id, category)
+
+@dp.callback_query_handler(lambda c: c.data == 'set_status')
+async def callback_handler_4(callback_query: types.CallbackQuery):
+    global order
+    set_status_keyboard = InlineKeyboardMarkup(row_width = 1)
+    returnOrderButton = InlineKeyboardButton(text = 'В пути',callback_data = 'editStatus_Отправлен')
+    order_button = InlineKeyboardButton(text = "Доставлен",callback_data = f'editStatus_Доставлен')
+    set_status_keyboard.add(order_button)
+    set_status_keyboard.insert(returnOrderButton)
+    await bot.send_message(callback_query.from_user.id, f"выберите статус для заказа {order}:", reply_markup = set_status_keyboard)
+
+@dp.callback_query_handler(lambda c: c.data.startswith("editStatus"))
+async def callback_handler_4(callback_query: types.CallbackQuery):
+    global order
+    status = callback_query.data.split('_')[1]
+    # print(status)
+    database.update_status_order(order, status)
+    await bot.send_message(callback_query.from_user.id, f"Статус заказа был изменен на {status}")
+
+
 
 @dp.message_handler(lambda message: message.text == "Админ епт")
 async def adminMod(message: types.Message):
@@ -132,9 +200,9 @@ async def profil_user(message: types.Message):
                                f"Здравствуйте {message.from_user.username} 👋\nВ данный момент вы не зарегистрированы в боте. Вы можете начать регистрироваться сейчас.",
                                reply_markup = Inline_keyboard.not_profil_data)
 
-@dp.callback_query_handler(lambda c: c.data == 'returnProfil')
-async def callback_handler(callback_query: types.CallbackQuery):
-    await profil_user(callback_query)
+# @dp.callback_query_handler(lambda c: c.data == 'returnProfil')
+# async def callback_handler(callback_query: types.CallbackQuery):
+#     await profil_user(callback_query)
 
 @dp.message_handler(state = catalog.ArticulForm.articul_numb)
 async def start_profile(message: types.Message, state: FSMContext):
@@ -225,11 +293,15 @@ async def change_data(callback_query: types.CallbackQuery):
     await profil_register.process_callback(bot, callback_query, State)
 
 
-@dp.callback_query_handler(lambda c: c.data == 'return_profile')
+@dp.callback_query_handler(lambda c: c.data == 'return_order')
+async def return_on_order(callback_query: types.CallbackQuery):
+    await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+    await my_order(callback_query)
+
+@dp.callback_query_handler(lambda c: c.data == 'returnProfil')
 async def return_on_profile(callback_query: types.CallbackQuery):
     await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
-    await handle_catalog_button(bot, callback_query.from_user.id)
-
+    await profil_user(callback_query)
 
 @dp.callback_query_handler(lambda c: c.data == 'data-enter_1', state = profil_register.ProfilState.CONFIRMATION)
 async def process_data_enter(callback_query: types.CallbackQuery, state: FSMContext):
@@ -267,9 +339,9 @@ async def back_return(callback_query: types.CallbackQuery):
 async def handle_corsina(message: types.Message):
     await corsina.show_cart(bot, message)
 
-@dp.callback_query_handler(lambda c: c.data in ['clear_cart', "pay_cont", "edit_cart", "show_basket"], state = '*')
-async def callback_handler(callback_query: types.CallbackQuery, state: FSMContext):
-    await corsina.process_callback(bot, callback_query, state)
+@dp.callback_query_handler(lambda c: c.data in ['clear_cart', "pay_cont", "edit_cart", "show_basket"])
+async def callback_handler(callback_query: types.CallbackQuery):
+    await corsina.process_callback(bot, callback_query)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'payment')
@@ -343,11 +415,7 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext):
                            payload = 'test-invoice-payload')
 
 
-@dp.message_handler(state = corsina.CartEditState.awaiting_item_number)
-async def edit_cart(message: types.Message, state: FSMContext):
-    async with state.proxy() as data_ed:
-        data_ed["item_number"] = message.text
-        await corsina.item_number_received(bot, message, state)
+
 
 @dp.message_handler(state = find_articul.SetAmount.new_amount)
 async def edit_cart(message: types.Message, state: FSMContext):
@@ -388,7 +456,6 @@ async def process_city(message: types.Message, state: FSMContext):
     await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
 
 
-# Обработчик для состояния ASK_STREET
 @dp.message_handler(state = PaymentState.ASK_STREET)
 async def process_street(message: types.Message, state: FSMContext):
     global message_id
@@ -433,6 +500,9 @@ async def process_house(message: types.Message, state: FSMContext):
                                 reply_markup = Inline_keyboard.user_data)
     await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
 
+@dp.callback_query_handler(lambda c: c.data == 'back_to_choose')
+async def callback_handler_2(callback_query: types.CallbackQuery):
+    await photo_hendler_two.process_callback(bot, callback_query)
 
 @dp.callback_query_handler(lambda c: c.data == 'data-enter', state = PaymentState.CONFIRMATION)
 async def process_data_enter(callback_query: types.CallbackQuery, state: FSMContext):
@@ -513,7 +583,12 @@ async def callback_handler_3(callback_query: types.CallbackQuery):
     await more_category.process_callback(bot, callback_query)
 
 
-@dp.callback_query_handler(lambda c: c.data in ['back-enter', 'forward-enter', 'choose_enter', 'amount_sum', 'amount_min', 'back_to_choose'])
+@dp.callback_query_handler(lambda c: c.data in ['forward-enter', 'choose_enter', 'amount_sum', 'amount_min'])
+async def callback_handler_4(callback_query: types.CallbackQuery):
+    await photo_hendler_two.process_callback(bot, callback_query)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'back-enter')
 async def callback_handler_4(callback_query: types.CallbackQuery):
     await photo_hendler_two.process_callback(bot, callback_query)
 
@@ -536,14 +611,6 @@ async def successful_payment(message: types.Message):
     for k, v in payment_info.items():
         print(f"{k} = {v}")
 
-
-    user_data = database.get_user_data(user_id)
-    if user_data:
-        user_info = f"*Данные пользователя:*\nИмя: {user_data[0]}\nОбласть: {user_data[2]}\nГород: {user_data[1]}\nУлица: {user_data[3]}\nДом: {user_data[4]}\nКвартира: {user_data[5]}\nИндекс: {user_data[6]}"
-    else:
-        user_info = "Информация о пользователе не найдена."
-
-    # Извлечение данных о заказе
     conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
     cursor.execute(
@@ -551,36 +618,27 @@ async def successful_payment(message: types.Message):
     orders = cursor.fetchall()
     conn.close()
 
-    last_order = orders
     orders_info = ''
-    all_price = 0
     item_number = 1
-
-    # Информация о последнем заказе
-
 
 
     id_order = random.randint(1000,2000)
     order_info = f"*Платеж прошел успешно*\nЗаказ номер {id_order}:\n"
-    # amount_price_1 = 0
     for item in orders:
         print(item)
-        # all_price_one_order = item[3] * item[4]
         selected_category = item[5]
-        # amount_price_1 += all_price_one_order
         order_info += f"*Товар:* {item[0]}\nАртикул: {item[1]}\nКатегория: {selected_category}\nВариант: {item[2]}\nКоличество: {item[3]}\n\n"
 
 
     for item in orders:
         print(item)
         amount_price_1 = item[3] * item[4]
-        selected_category = item[5]
         database.set_user_order(user_id, id_order, item[0], item[1], item[2], item[3], amount_price_1)
+        database.update_status_order(id_order, status = 'Создан')
     await bot.send_message(user_id,f"{order_info}",parse_mode = 'Markdown')
 
     current_order_number = database.get_user_order_order_id(id_order)
     orders_info += f"*Заказ: {current_order_number[0]}*\n"
-    # Отправление сообщение админу с покупкой
     orders_info = f"*Детали заказа {id_order}*\n"
     for order in current_order_number:
             # all_price = order[4]
@@ -589,12 +647,9 @@ async def successful_payment(message: types.Message):
                            f"Вариант: {order[2]}\n" \
                            f"Кол-во: {order[3]}\n\n"
             item_number += 1
-            # all_price += order[4]
 
-        # Добавляем информацию о стоимости и статусе последнего заказа
-    orders_info += f"Статус заказа: Ща приедет скоро че ты\n"
-    # Отправка информации пользователю
-    await bot.send_message(1066300592, f"{user_info}\n\n{orders_info}", parse_mode = 'Markdown')
+    orders_info += f"Статус заказа: Создан\n"
+    await bot.send_message(config.ID_ADMIN, f"*🛑ВНИМАНИЕ🛑*\n*Создан новый заказ {id_order}*", parse_mode = 'Markdown')
 
     await corsina.clear_user_cart(user_id)
 
@@ -604,6 +659,21 @@ async def handle_category_choice(callback_query: types.CallbackQuery):
     category = callback_query.data.split('_')[1]
     await show_category_products(bot, callback_query.message.chat.id, category)
 
+@dp.callback_query_handler(lambda c: c.data.startswith("corzinaEditSum"))
+async def handle_category_choice(callback_query: types.CallbackQuery):
+    corzinaEdit = callback_query.data.split('_')[1]
+    await corsina.edit_cart_amount_Sum(bot, callback_query, corzinaEdit)
+
+
+@dp.callback_query_handler(lambda c: c.data.startswith("corzinaEditMin"))
+async def handle_category_choice(callback_query: types.CallbackQuery):
+    corzinaEdit = callback_query.data.split('_')[1]
+    await corsina.edit_cart_amount_Min(bot, callback_query, corzinaEdit)
+
+@dp.callback_query_handler(lambda c: c.data.startswith("corzinaEditDel"))
+async def handle_category_choice(callback_query: types.CallbackQuery):
+    corzinaEdit = callback_query.data.split('_')[1]
+    await corsina.edit_cart_Delete(bot, callback_query, corzinaEdit)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates = True)

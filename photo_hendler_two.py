@@ -15,13 +15,15 @@ grouped_prices = {
     r"2003\d{2}": 200,
     r"3001\d{2}": 120}
 
-async def send_photo(bot, chat_id, path_dir, category_name, message_id):
+async def send_photo(bot, chat_id, path_dir, category_name, message_id, category_index):
     global amount
     amount = 1
     global current_image_index
     current_image_index = 0
     global cat_name
     cat_name = category_name
+    global category_numb
+    category_numb = int(category_index)
 
     print(cat_name)
     global image_direct
@@ -59,6 +61,8 @@ async def process_callback(bot, callback_query):
     global cat_name
     global message_id
     global all_amount_prod
+    global category_numb
+
     all_amount_prod = 0
     # global articul
     # articul = 0
@@ -66,15 +70,14 @@ async def process_callback(bot, callback_query):
     path_dir = os.path.join(image_direct) # path
     images = [f for f in os.listdir(path_dir) if os.path.isfile(os.path.join(path_dir, f))]
 
-    if callback_query.data == "back_to_choose":
-        await bot.delete_message(callback_query.message.chat.id,callback_query.message.message_id)
-        await photo_handler.send_photo(bot,callback_query.message.chat.id, current_image_index)
+
 
     if callback_query.data == 'back-enter':
         # if current_image_index > 0:
         current_image_index = (current_image_index - 1) % len(images)
         amount = 1
         print(current_image_index)
+
     elif callback_query.data == 'forward-enter':
         # if current_image_index < len(images) - 1: # что бы списки не прокручивались после того как закончились
         current_image_index = (current_image_index + 1) % len(images)
@@ -84,6 +87,8 @@ async def process_callback(bot, callback_query):
     elif callback_query.data == 'amount_min':
         if amount > 1:
             amount -= 1
+
+
     photo_path = os.path.join(path_dir,images[current_image_index])
     products_to_choose = images[current_image_index].split('_')[1]
     category = images[current_image_index].split('_')[2]
@@ -95,32 +100,31 @@ async def process_callback(bot, callback_query):
         if amount < max_amount[0]:
             amount += 1
     if callback_query.data == 'choose_enter':
-        print(products_to_choose)
-        print(category)
-        print(articul)
-        amount_def = 0
         all_amount_prod = data.db.database.get_all_amount(articul)
         all_amount = all_amount_prod[0]
         amount_def = all_amount
         all_amount -= amount
         data.db.database.update_all_amount(articul,all_amount)
+
         price = data.db.database.get_price(articul)
         all_price = 0
         if amount_def > 0:
             for pattern, price in grouped_prices.items():
                 if re.match(pattern,articul):
                         await corsina.add_to_cart(callback_query.message.chat.id,cat_name,articul,current_image_index + 1,amount,price, category_numb)
-                        print(f"{cat_name}, {category} {category_numb}")
-                        await data.db.database.add_product(articul, cat_name, current_image_index + 1, price, photo_path)
-                        print(f"PATH: {photo_path}")
                         all_price += price * amount
 
             await bot.send_message(callback_query.message.chat.id,
                                    f"Товар {cat_name}:\n\nАртикул: {articul}\nВыбранный вариант: {current_image_index + 1}\nКоличество: {amount}\nЦена: {all_price}\n\nБыл успешно добавлен в корзину 💵‍",
                                    reply_markup = Inline_keyboard.show_basket_add)
 
+    if callback_query.data == "back_to_choose":
+        await bot.delete_message(callback_query.message.chat.id,callback_query.message.message_id)
+        print(f"category_numb: {category_numb}")
+        await photo_handler.send_photo(bot,callback_query.from_user.id, int(category_numb) + 1)
+        return
+
     all_amount_prod = data.db.database.get_all_amount(articul)
-    print(f"art: {articul}")
     if all_amount_prod[0] > 0:
         caption_text = f"\n{current_image_index + 1}/{len(images)}\nАртикул: {articul}\nОсталось: {all_amount_prod[0]}\nКол-во: {amount}"
         await bot.edit_message_media(

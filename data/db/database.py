@@ -53,6 +53,12 @@ async def add_product(articul, name, variant, price, photo_path):
     conn.close()
 
 
+def delete_order_corsina(id):
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM cart_items WHERE id = ?",(id,))
+    conn.commit()
+    conn.close()
 # def update_all_amount():
 #     conn = sqlite3.connect('data/bot_product.db')
 #     cursor = conn.cursor()
@@ -121,6 +127,40 @@ def update_all_amount(articul, new_amount):
     conn.commit()
     conn.close()
 
+def update_all_amount_corzina(id, new_amount):
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+    # Обновляем all_amount для заданного артикула
+    cursor.execute('UPDATE cart_items SET quantity = ? WHERE id = ?',(new_amount,id))
+    conn.commit()
+    conn.close()
+
+def update_all_amount_corzina_new_order(user_id, articul, new_amount):
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+    # Обновляем all_amount для заданного артикула
+    cursor.execute('UPDATE cart_items SET quantity = ? WHERE articul = ? AND user_id = ?',(new_amount,articul, user_id, ))
+    conn.commit()
+    conn.close()
+
+
+def update_status_order(id_order, status):
+    conn = sqlite3.connect('data/bot_users_order.db')
+    cursor = conn.cursor()
+    # Обновляем all_amount для заданного артикула
+    cursor.execute('UPDATE users_order SET status = ? WHERE id_order = ?', (status, id_order,))
+    conn.commit()
+    conn.close()
+
+def get_articul_corsina(user_id, articul):
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM cart_items WHERE user_id = ? AND articul = ?',(user_id, articul, ))
+    order = cursor.fetchall()
+    conn.commit()
+    conn.close()
+    return order if order else None
+
 def get_total_price(user_id):
     conn = sqlite3.connect('data/user_corsina.db')
     cursor = conn.cursor()
@@ -129,6 +169,15 @@ def get_total_price(user_id):
     conn.commit()
     conn.close()
     return total_price if total_price else None
+
+def get_total_quantity(id):
+    conn = sqlite3.connect('data/user_corsina.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT quantity FROM cart_items WHERE id = ?',(id,))
+    quantity = cursor.fetchone()
+    conn.commit()
+    conn.close()
+    return quantity if quantity else None
 
 def get_user_order(user_id):
     conn = sqlite3.connect('data/bot_users_order.db')
@@ -139,10 +188,20 @@ def get_user_order(user_id):
     conn.close()
     return parametr if parametr else None
 
+
+def get_all_user_order():
+    conn = sqlite3.connect('data/bot_users_order.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT id_order, name_product, articul, variant, quantity, price FROM users_order')
+    parametr = cursor.fetchall()
+    conn.commit()
+    conn.close()
+    return parametr if parametr else None
+
 def get_user_order_order_id(order_id):
     conn = sqlite3.connect('data/bot_users_order.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT name_product, articul, variant, quantity, price FROM users_order WHERE id_order = ?',(order_id,))
+    cursor.execute('SELECT name_product, articul, variant, quantity, price, status, user_id FROM users_order WHERE id_order = ?',(order_id,))
     parametr = cursor.fetchall()
     conn.commit()
     conn.close()

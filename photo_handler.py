@@ -48,6 +48,12 @@ async def start_send_photo(bot, chat_id, image_dir):
 
 
 async def send_photo(bot, chat_id, current_category_index):
+    global current_message_id
+    global current_image_index
+    global current_photo_path
+    current_message_id = None
+    current_image_index = None
+    current_photo_path = None
     for category, subcategories in image_captions:
         if image_direct == category:
             if 0 <= current_category_index < len(subcategories):
@@ -58,12 +64,11 @@ async def send_photo(bot, chat_id, current_category_index):
                 print(f"category_info {category_info} Category_name {category_name}")
                 category_path = os.path.join(image_direct)
                 images = [f for f in os.listdir(category_path) if os.path.isfile(os.path.join(category_path, f))]
-                global current_image_index
+
                 current_image_index = 0
-                global current_photo_path
+
                 current_photo_path = os.path.join(category_path, images[current_image_index])
                 caption_text = f"{category_name}\n{current_image_index + 1}/{len(images)}"
-                global current_message_id
                 current_message_id = (await bot.send_photo(chat_id, InputFile(current_photo_path), caption=caption_text, reply_markup=Inline_keyboard.category_product)).message_id
                 print("send photo in ph")
                 print(current_message_id)
@@ -77,7 +82,7 @@ async def send_photo_to_categorical(bot, chat_id, current_category_index, messag
             category_name, category_path_suffix = category_info[1], category_info[2]
             global current_image_index
             current_image_index = 0
-            await photo_hendler_two.send_photo(bot,chat_id,category_path_suffix,category_name, message_id)
+            await photo_hendler_two.send_photo(bot,chat_id,category_path_suffix,category_name, message_id, current_category_index)
 
 
 async def process_callback(bot, callback_query):

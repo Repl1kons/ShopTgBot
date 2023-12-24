@@ -3,6 +3,7 @@ import sqlite3
 from aiogram import types
 
 import catalog
+import config
 import corsina
 from data import db
 from aiogram.types import InputFile
@@ -41,7 +42,7 @@ async def start_articul(bot, chat_id, articul_numb):
         print(articul_data)
         if articul_data[5] > 0:
             caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: 1\nОсталось: {articul_data[5]}"
-            if chat_id == 1066300592:
+            if chat_id == config.ID_ADMIN:
                 from keyboards.Inline.Inline_keyboard import product_show_articul_for_admin
                 photo_message_id = (await bot.send_photo(chat_id, photo = InputFile(articul_data[4]), caption = caption, parse_mode = "Markdown", reply_markup = product_show_articul_for_admin)).message_id
 
@@ -56,7 +57,7 @@ async def start_articul(bot, chat_id, articul_numb):
             amount_to_buy = 1
         else:
             caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nК сожалению данный товар закончился😢"
-            if chat_id == 1066300592:
+            if chat_id == config.ID_ADMIN:
                 from keyboards.Inline.Inline_keyboard import product_show_articul_nol_for_admin
                 photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,
                                                          parse_mode = "Markdown",
@@ -134,7 +135,7 @@ async def process_callback(bot, callback_query, state):
 
     # caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: {amount_to_buy}\nОсталось: {articul_data[5]}"
     all_amount_prod = db.database.get_all_amount(articul_data[0])
-    if callback_query.message.chat.id == 1066300592:
+    if callback_query.message.chat.id == config.ID_ADMIN:
         if all_amount_prod[0] > 0:
             caption_text = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: {amount_to_buy}\nОсталось: {articul_data[5]}"
             await bot.edit_message_caption(

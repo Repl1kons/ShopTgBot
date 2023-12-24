@@ -7,6 +7,10 @@ edit_basket = InlineKeyboardButton(text = '✏ Изменить', callback_data 
 payment_button = InlineKeyboardButton(text = '💳 Оплатить', callback_data = 'payment')
 keyboard_basket.add(clear_button, edit_basket, payment_button)
 
+returnOrder = InlineKeyboardMarkup()
+returnOrderButton = InlineKeyboardButton(text = 'Назад', callback_data = 'return_order')
+returnOrder.add(returnOrderButton)
+
 returnProfil = InlineKeyboardMarkup()
 returnProfilButton = InlineKeyboardButton(text = 'Назад', callback_data = 'returnProfil')
 returnProfil.add(returnProfilButton)
