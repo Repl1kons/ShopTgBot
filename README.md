@@ -1,6 +1,6 @@
 # it's my planner | by A-STUDENT!
 
-<img src="data/ava.png" alt="it's my planner | by A-STUDENT!" width="150" height="150">
+<img src="data/readme/ava.png" alt="it's my planner | by A-STUDENT!" width="150" height="150">
 
 ## 🌟 Добро пожаловать в it's my planner!
 
