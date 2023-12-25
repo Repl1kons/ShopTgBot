@@ -31,6 +31,8 @@ image_captions = [
 
 
 async def start_send_photo(bot, chat_id, image_dir):
+    global current_category_index
+    current_category_index = 0
     global image_direct
     image_direct = image_dir
     global categories_1
@@ -41,25 +43,23 @@ async def start_send_photo(bot, chat_id, image_dir):
         if image_direct == category:
             categories_1 = [subcategory[1] for subcategory in subcategories]
             print(categories_1)
-    global current_category_index
-    current_category_index = 0
+
     await send_photo(bot, chat_id, current_category_index)
 
 
 
-async def send_photo(bot, chat_id, current_category_index):
+async def send_photo(bot, chat_id, current_cat_ind):
     global current_message_id
     global current_image_index
     global current_photo_path
+    global current_category_index
+    current_category_index = current_cat_ind
     current_message_id = None
-    current_image_index = None
-    current_photo_path = None
     for category, subcategories in image_captions:
         if image_direct == category:
             if 0 <= current_category_index < len(subcategories):
                 category_info = subcategories[current_category_index]
             # category_info = subcategories[current_category_index]
-                global category_path_suffix
                 category_name, category_path_suffix = category_info[1], category_info[2]
                 print(f"category_info {category_info} Category_name {category_name}")
                 category_path = os.path.join(image_direct)
@@ -72,6 +72,7 @@ async def send_photo(bot, chat_id, current_category_index):
                 current_message_id = (await bot.send_photo(chat_id, InputFile(current_photo_path), caption=caption_text, reply_markup=Inline_keyboard.category_product)).message_id
                 print("send photo in ph")
                 print(current_message_id)
+
 
 
 async def send_photo_to_categorical(bot, chat_id, current_category_index, message_id):
@@ -88,12 +89,14 @@ async def send_photo_to_categorical(bot, chat_id, current_category_index, messag
 async def process_callback(bot, callback_query):
     global current_category_index
     global current_photo_path
+    global current_image_index
 
+    print(current_category_index)
     if callback_query.data == 'back':
-        if current_category_index > 0:
+        # if current_category_index > 0:
             current_category_index = (current_category_index - 1) % len(categories_1)
     elif callback_query.data == 'forward':
-        if current_category_index < len(categories_1) - 1:
+        # if current_category_index < len(categories_1):
             current_category_index = (current_category_index + 1) % len(categories_1)
 
     elif callback_query.data == 'choose_enter_categorical':
@@ -112,7 +115,6 @@ async def process_callback(bot, callback_query):
             category_name, category_path_suffix = category_info[1], category_info[2]
             category_path = os.path.join(image_direct)
             images = [f for f in os.listdir(category_path) if os.path.isfile(os.path.join(category_path, f))]
-            global current_image_index
             if callback_query.data == 'back':
                 # if current_image_index > 0:
                 current_image_index = (current_image_index - 1) % len(images)
@@ -137,6 +139,11 @@ async def process_callback(bot, callback_query):
                     await bot.delete_message(callback_query.message.chat.id, message_id = callback_query.message.message_id)
                     await more_category.start_send_photo_more(bot,callback_query.message.chat.id,current_photo_path, image_direct, more_path, more_text)
 
+            elif callback_query.data == "back_to_choose":
+                await bot.delete_message(callback_query.message.chat.id,callback_query.message.message_id)
+                current_category_index = 0
+                await send_photo(bot,callback_query.from_user.id, current_category_index)
+                # return
             # elif callback_query.data == 'back_return':
             #     # async def back_return(callback_query: types.CallbackQuery):
             #     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)

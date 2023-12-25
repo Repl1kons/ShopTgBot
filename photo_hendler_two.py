@@ -23,7 +23,7 @@ async def send_photo(bot, chat_id, path_dir, category_name, message_id, category
     global cat_name
     cat_name = category_name
     global category_numb
-    category_numb = int(category_index)
+    category_numb = category_index
 
     print(cat_name)
     global image_direct
@@ -62,6 +62,7 @@ async def process_callback(bot, callback_query):
     global message_id
     global all_amount_prod
     global category_numb
+    global image_direct
 
     all_amount_prod = 0
     # global articul
@@ -92,6 +93,7 @@ async def process_callback(bot, callback_query):
     photo_path = os.path.join(path_dir,images[current_image_index])
     products_to_choose = images[current_image_index].split('_')[1]
     category = images[current_image_index].split('_')[2]
+    print(f"Category: {category}")
     category_numb = category
     products_number = images[current_image_index].split('.')[0].split('_')[3]
     articul = f"{products_to_choose}00{category}00{products_number}"
@@ -118,11 +120,7 @@ async def process_callback(bot, callback_query):
                                    f"Товар {cat_name}:\n\nАртикул: {articul}\nВыбранный вариант: {current_image_index + 1}\nКоличество: {amount}\nЦена: {all_price}\n\nБыл успешно добавлен в корзину 💵‍",
                                    reply_markup = Inline_keyboard.show_basket_add)
 
-    if callback_query.data == "back_to_choose":
-        await bot.delete_message(callback_query.message.chat.id,callback_query.message.message_id)
-        print(f"category_numb: {category_numb}")
-        await photo_handler.send_photo(bot,callback_query.from_user.id, int(category_numb) + 1)
-        return
+
 
     all_amount_prod = data.db.database.get_all_amount(articul)
     if all_amount_prod[0] > 0:

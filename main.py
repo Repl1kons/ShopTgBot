@@ -502,7 +502,7 @@ async def process_house(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda c: c.data == 'back_to_choose')
 async def callback_handler_2(callback_query: types.CallbackQuery):
-    await photo_hendler_two.process_callback(bot, callback_query)
+    await photo_handler.process_callback(bot, callback_query)
 
 @dp.callback_query_handler(lambda c: c.data == 'data-enter', state = PaymentState.CONFIRMATION)
 async def process_data_enter(callback_query: types.CallbackQuery, state: FSMContext):
