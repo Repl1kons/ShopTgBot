@@ -35,6 +35,7 @@ async def show_category_products(bot, chat_id, category):
         await bot.delete_message(chat_id,messageid)
         await start_send_photo(bot, chat_id, path)
 
+
     if category == "🖼 Обложки":
         path = "covers/categor"
         await bot.delete_message(chat_id,messageid)

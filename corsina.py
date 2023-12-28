@@ -192,11 +192,9 @@ async def edit_cart_amount_Min(bot, callback_query: types.CallbackQuery, corzina
 
     if rows and rows[0][0] > 1:
         for item in rows:
-
-
             now_amount = item[0]
             new_amount = now_amount - 1
-            database.update_all_amount_corzina(corzinaEdit, new_amount)
+        database.update_all_amount_corzina(corzinaEdit, new_amount)
         welcome_message = create_cart_edit_message(callback_query.from_user.id)
         # welcome_message += '———\n'
         new_keyboard = create_cart_keyboard(callback_query.from_user.id)

@@ -188,7 +188,6 @@ def get_user_order(user_id):
     conn.close()
     return parametr if parametr else None
 
-
 def get_all_user_order():
     conn = sqlite3.connect('data/bot_users_order.db')
     cursor = conn.cursor()

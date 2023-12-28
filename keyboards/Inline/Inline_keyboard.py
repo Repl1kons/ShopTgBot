@@ -16,12 +16,11 @@ returnProfilButton = InlineKeyboardButton(text = 'Назад', callback_data = '
 returnProfil.add(returnProfilButton)
 
 show_basket_add = InlineKeyboardMarkup()
-show_basket = InlineKeyboardButton(text = '📦🛒 К корзине', callback_data = 'show_basket')
-show_basket_add.add(show_basket)
+catalog_basket = InlineKeyboardButton(text = "🛍 Каталог", callback_data = 'back_return')
+show_basket = InlineKeyboardButton(text = '📦🛒 Корзина', callback_data = 'show_basket')
+show_basket_add.add(catalog_basket, show_basket)
 
-# show_basket_return = InlineKeyboardMarkup()
-# show_basket_ret = InlineKeyboardButton(text = 'К корзине', callback_data = 'show_basket')
-# show_basket_return.add(show_basket_ret)
+
 
 """Клавиатура каталога товаров"""
 product_categories = ['📔 Ежедневники', '💳 Кард-холдеры', '🖼 Обложки', "🔍 Поиск артикула"]
@@ -103,7 +102,7 @@ confirmation_keyboard = InlineKeyboardMarkup(row_width = 2).add(
     InlineKeyboardButton(text = '✏ Изменить', callback_data = 'change_data'),
     InlineKeyboardButton(text = '✅ Подтвердить', callback_data = 'confirm_data'))
 
-profile_data_return = InlineKeyboardButton(text = "🛍 Каталог", callback_data = 'return_profile')
+profile_data_return = InlineKeyboardButton(text = "🛍 Каталог", callback_data = 'back_return')
 
 profil_data_edit = InlineKeyboardButton(text = '✏ Изменить', callback_data = 'change_data')
 profil_data = InlineKeyboardMarkup().add(profil_data_edit)

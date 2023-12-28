@@ -1,5 +1,6 @@
 import random
 import sqlite3
+
 import catalog
 import find_articul
 import more_category
@@ -10,7 +11,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils import executor
 import config
 import corsina
-from catalog import handle_catalog_button, show_category_products  # Импортируем новый обработчик
+from catalog import handle_catalog_button, show_category_products
 import photo_handler
 import photo_hendler_two
 from aiogram.types import ContentTypes,InlineKeyboardMarkup,InlineKeyboardButton

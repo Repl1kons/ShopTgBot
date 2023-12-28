@@ -36,7 +36,7 @@ async def start_articul(bot, chat_id, articul_numb):
     global articul_data
     articul_data = get_articul_data(articul_numb)
 
-    start_articul = (await bot.send_message(chat_id, f"Вы ввели артикул: {articul_numb}")).message_id
+    # start_articul = (await bot.send_message(chat_id, f"Вы ввели артикул: {articul_numb}")).message_id
     if articul_data:
         print(articul_data)
         if articul_data[5] > 0:

@@ -5,6 +5,13 @@ import photo_hendler_two
 import utils
 from keyboards.Inline import Inline_keyboard
 
+
+import sys
+
+# Установите кодировку консоли на UTF-8
+
+# Установите кодировку консоли на UTF-8
+
 image_captions = [
     ["planers/categor",
         [
