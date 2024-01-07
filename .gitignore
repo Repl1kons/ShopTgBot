@@ -1,7 +1,2 @@
 .idea
 __pycache__/
-config.py
-test.py
-*.csv
-*.json
-comunity.py

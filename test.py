@@ -1,0 +1,66 @@
+# import json
+# import time
+# import requests
+#
+# def request_data():
+#     token = "df116b67df116b67df116b6725dc07ab97ddf11df116b67ba9dc54dc59cb79bed1dbf00"
+#     version = 5.92
+#     domain = "its_my_planner"
+#     count = 100
+#     offset = 0
+#     all_posts = []
+#
+#     while offset < 1000:
+#         response = requests.get("https://api.vk.com/method/wall.get", params={
+#             'access_token': token,
+#             "v": version,
+#             'domain': domain,
+#             'count': count,
+#             'offset': offset
+#         })
+#         data = response.json()['response']['items']
+#         offset += 100
+#         all_posts.extend(data)
+#         time.sleep(0.5)
+#
+#     return all_posts
+#
+# def write_to_json(all_posts):
+#     result_data = []
+#     for post in all_posts:
+#         try:
+#             if post['attachments'][0]['type']:
+#                 img_url = post['attachments'][0]['photo']["sizes"][-1]['url']
+#             else:
+#                 img_url = 'pass'
+#         except:
+#             pass
+#         text = post['text'].replace(" — ", "— ")
+#         result_data.append({
+#             "text": text,
+#             "IMG": img_url
+#         })
+#
+#     with open("its_my_planner.json", "w", encoding='utf-8') as json_file:
+#         json.dump(result_data, json_file, ensure_ascii=False, indent=4)
+#
+# all_posts = request_data()
+# write_to_json(all_posts)
+#
+# import json
+# import sys
+#
+#
+# # Открываем JSON-файл для чтения
+# with open("its_my_planner.json", "r", encoding='windows-1251') as json_file:
+#     data = json.load(json_file)
+#
+# # Перебираем элементы JSON-структуры
+# for item in data:
+#     text = item["text"].replace("? ", "")
+#     text = item["text"].replace("? ", "")
+#     img_url = item["IMG"]
+#
+#     # Теперь вы можете использовать переменные text и img_url по вашему усмотрению
+#     print("Text:", text)
+#     print("IMG:", img_url)
