@@ -120,13 +120,10 @@ async def my_order(callback_query: types.CallbackQuery):
     else:
         await bot.send_message(callback_query.message.chat.id, "Похоже вы еще не сделали ни одного заказа🤨", reply_markup = Inline_keyboard.returnProfil)
 
-def read_logs():
-    with open("bot_logs.txt", "r") as file:
-        return file.readlines()
 
 @dp.message_handler(commands=['status'])
 async def status_command(message):
-    with open("app.txt", "rb") as log_file:
+    with open("app.log", "rb") as log_file:
         await bot.send_document(message.chat.id, log_file)
 
 @dp.callback_query_handler(lambda c: c.data.startswith('order'))
