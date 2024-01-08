@@ -9,7 +9,6 @@ from data import db
 from aiogram.types import InputFile
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from main import logger
 from keyboards.Inline import Inline_keyboard
 
 
