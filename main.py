@@ -126,7 +126,7 @@ def read_logs():
 
 @dp.message_handler(commands=['status'])
 async def status_command(message):
-    with open("bot_logs.txt", "rb") as log_file:
+    with open("app.txt", "rb") as log_file:
         await bot.send_document(message.chat.id, log_file)
 
 @dp.callback_query_handler(lambda c: c.data.startswith('order'))

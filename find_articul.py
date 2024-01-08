@@ -9,8 +9,10 @@ from data import db
 from aiogram.types import InputFile
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from main import logger
 from keyboards.Inline import Inline_keyboard
+import logging
+
+logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class SetAmount(StatesGroup):
@@ -34,49 +36,52 @@ async def start_articul(bot, chat_id, articul_numb):
 
     global photo_message_id
     global articul_data
-    articul_data = get_articul_data(articul_numb)
+    try:
 
-    # start_articul = (await bot.send_message(chat_id, f"Вы ввели артикул: {articul_numb}")).message_id
-    if articul_data:
-        print(articul_data)
-        if articul_data[5] > 0:
-            caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: 1\nОсталось: {articul_data[5]}"
-            if chat_id == config.ID_ADMIN:
-                from keyboards.Inline.Inline_keyboard import product_show_articul_for_admin
-                photo_message_id = (await bot.send_photo(chat_id, photo = InputFile(articul_data[4]), caption = caption, parse_mode = "Markdown", reply_markup = product_show_articul_for_admin)).message_id
+        articul_data = get_articul_data(articul_numb)
 
-            else:
+        # start_articul = (await bot.send_message(chat_id, f"Вы ввели артикул: {articul_numb}")).message_id
+        if articul_data:
+            print(articul_data)
+            if articul_data[5] > 0:
                 caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: 1\nОсталось: {articul_data[5]}"
-                from keyboards.Inline.Inline_keyboard import product_show_articul
-                photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,parse_mode = "Markdown",
-                                         reply_markup = product_show_articul)).message_id
-            print(articul_data)
-            global amount_to_buy
+                if chat_id == config.ID_ADMIN:
+                    from keyboards.Inline.Inline_keyboard import product_show_articul_for_admin
+                    photo_message_id = (await bot.send_photo(chat_id, photo = InputFile(articul_data[4]), caption = caption, parse_mode = "Markdown", reply_markup = product_show_articul_for_admin)).message_id
 
-            amount_to_buy = 1
-        else:
-            caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nК сожалению данный товар закончился😢"
-            if chat_id == config.ID_ADMIN:
-                from keyboards.Inline.Inline_keyboard import product_show_articul_nol_for_admin
-                photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,
-                                                         parse_mode = "Markdown",
-                                                         reply_markup = product_show_articul_nol_for_admin)).message_id
+                else:
+                    caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: 1\nОсталось: {articul_data[5]}"
+                    from keyboards.Inline.Inline_keyboard import product_show_articul
+                    photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,parse_mode = "Markdown",
+                                             reply_markup = product_show_articul)).message_id
+                print(articul_data)
+                global amount_to_buy
 
+                amount_to_buy = 1
             else:
-                from keyboards.Inline.Inline_keyboard import product_show_articul_nol
-                await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,
-                                                         parse_mode = "Markdown",
-                                                         reply_markup = product_show_articul_nol)
-            print(articul_data)
-            amount_to_buy = 1
-            print(amount_to_buy)
-    else:
-        await bot.delete_message(chat_id, start_articul)
-        await catalog.ArticulForm.articul_numb.set()
-        await bot.send_message(chat_id, "Данный артикул некорректен, пожалуйста проверьте и напишите его заново!!\n"
-                                        "Если все правильно, то вы можете обратиться к нам за помощью (в команде 🆘 Помощь или /help)\n\n"
-                                        "Попробуйте ввести артикул заново")
+                caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nК сожалению данный товар закончился😢"
+                if chat_id == config.ID_ADMIN:
+                    from keyboards.Inline.Inline_keyboard import product_show_articul_nol_for_admin
+                    photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,
+                                                             parse_mode = "Markdown",
+                                                             reply_markup = product_show_articul_nol_for_admin)).message_id
 
+                else:
+                    from keyboards.Inline.Inline_keyboard import product_show_articul_nol
+                    await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,
+                                                             parse_mode = "Markdown",
+                                                             reply_markup = product_show_articul_nol)
+                print(articul_data)
+                amount_to_buy = 1
+                print(amount_to_buy)
+        else:
+            await bot.delete_message(chat_id, start_articul)
+            await catalog.ArticulForm.articul_numb.set()
+            await bot.send_message(chat_id, "Данный артикул некорректен, пожалуйста проверьте и напишите его заново!!\n"
+                                            "Если все правильно, то вы можете обратиться к нам за помощью (в команде 🆘 Помощь или /help)\n\n"
+                                            "Попробуйте ввести артикул заново")
+    except Exception as e:
+        logging.error(f"Ошибка при обработке start_articul: {e}",exc_info = True)
 
 
 async def set_amount_art(bot, message: types.Message, state: FSMContext):
