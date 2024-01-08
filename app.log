@@ -14,3 +14,92 @@ STATUS: Бот запущен.
 2024-01-08 04:01:25,907 - INFO - Start polling.
 2024-01-08 04:01:43,624 - INFO - Stop polling...
 2024-01-08 04:01:43,625 - WARNING - Goodbye!
+2024-01-08 04:15:48,036 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-08 04:15:48,210 - INFO - Bot: A-Student [@by_AStudent_bot]
+2024-01-08 04:15:48,313 - WARNING - Updates were skipped successfully.
+2024-01-08 04:15:48,314 - INFO - Start polling.
+2024-01-08 04:15:53,470 - ERROR - Cause exception while getting updates.
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2024-01-08 04:16:03,597 - ERROR - Cause exception while getting updates.
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2024-01-08 04:16:13,745 - ERROR - Cause exception while getting updates.
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2024-01-08 04:16:19,765 - INFO - Stop polling...
+2024-01-08 04:16:19,766 - WARNING - Goodbye!
+2024-01-08 04:16:20,982 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-08 04:16:21,200 - INFO - Bot: ShazamBot [@RecognizeYourTrackbot]
+2024-01-08 04:16:21,311 - WARNING - Updates were skipped successfully.
+2024-01-08 04:16:21,312 - INFO - Start polling.
+2024-01-08 04:17:04,476 - INFO - Stop polling...
+2024-01-08 04:17:04,477 - WARNING - Goodbye!
+2024-01-08 04:17:06,157 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-08 04:17:06,863 - INFO - Bot: ShazamBot [@RecognizeYourTrackbot]
+2024-01-08 04:17:06,977 - WARNING - Updates were skipped successfully.
+2024-01-08 04:17:06,977 - INFO - Start polling.
+2024-01-08 04:19:16,321 - INFO - Stop polling...
+2024-01-08 04:19:16,321 - WARNING - Goodbye!
+2024-01-08 04:19:17,496 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-08 04:19:17,679 - INFO - Bot: ShazamBot [@RecognizeYourTrackbot]
+2024-01-08 04:19:17,785 - WARNING - Updates were skipped successfully.
+2024-01-08 04:19:17,785 - INFO - Start polling.
+2024-01-08 04:20:43,537 - INFO - Stop polling...
+2024-01-08 04:20:43,538 - WARNING - Goodbye!

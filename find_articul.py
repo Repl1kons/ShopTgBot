@@ -46,29 +46,33 @@ async def start_articul(bot, chat_id, articul_numb):
             if articul_data[5] > 0:
                 caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: 1\nОсталось: {articul_data[5]}"
                 if chat_id == config.ID_ADMIN:
+                    data_art = articul_data[4].replace("\\", "/")
                     from keyboards.Inline.Inline_keyboard import product_show_articul_for_admin
-                    photo_message_id = (await bot.send_photo(chat_id, photo = InputFile(articul_data[4]), caption = caption, parse_mode = "Markdown", reply_markup = product_show_articul_for_admin)).message_id
+                    photo_message_id = (await bot.send_photo(chat_id, photo = InputFile(data_art), caption = caption, parse_mode = "Markdown", reply_markup = product_show_articul_for_admin)).message_id
 
                 else:
+                    data_art = articul_data[4].replace("\\","/")
                     caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nКол-во: 1\nОсталось: {articul_data[5]}"
                     from keyboards.Inline.Inline_keyboard import product_show_articul
-                    photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,parse_mode = "Markdown",
+                    photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(data_art),caption = caption,parse_mode = "Markdown",
                                              reply_markup = product_show_articul)).message_id
                 print(articul_data)
                 global amount_to_buy
 
                 amount_to_buy = 1
             else:
+                data_art = articul_data[4].replace("\\","/")
                 caption = f"*{articul_data[1]}*\n*Вариант товара*: {articul_data[2]}\n*Цена*: {articul_data[3]}\nК сожалению данный товар закончился😢"
                 if chat_id == config.ID_ADMIN:
+                    print(articul_data[4])
                     from keyboards.Inline.Inline_keyboard import product_show_articul_nol_for_admin
-                    photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,
+                    photo_message_id = (await bot.send_photo(chat_id,photo = InputFile(data_art),caption = caption,
                                                              parse_mode = "Markdown",
                                                              reply_markup = product_show_articul_nol_for_admin)).message_id
 
                 else:
                     from keyboards.Inline.Inline_keyboard import product_show_articul_nol
-                    await bot.send_photo(chat_id,photo = InputFile(articul_data[4]),caption = caption,
+                    await bot.send_photo(chat_id,photo = InputFile(data_art),caption = caption,
                                                              parse_mode = "Markdown",
                                                              reply_markup = product_show_articul_nol)
                 print(articul_data)
