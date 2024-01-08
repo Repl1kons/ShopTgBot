@@ -9,7 +9,7 @@ from data import db
 from aiogram.types import InputFile
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-
+from main import logger
 from keyboards.Inline import Inline_keyboard
 
 
@@ -76,7 +76,6 @@ async def start_articul(bot, chat_id, articul_numb):
         await bot.send_message(chat_id, "Данный артикул некорректен, пожалуйста проверьте и напишите его заново!!\n"
                                         "Если все правильно, то вы можете обратиться к нам за помощью (в команде 🆘 Помощь или /help)\n\n"
                                         "Попробуйте ввести артикул заново")
-
 
 
 

@@ -1,3 +1,4 @@
+import logging
 import random
 import sqlite3
 
@@ -20,6 +21,15 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from keyboards.Inline import Inline_keyboard
 
+logger = logging.getLogger('Shop-bot')
+
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+file_handler = logging.FileHandler("bot_logs.txt")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 class PaymentState(StatesGroup):
     ASK_NAME = State()
@@ -109,6 +119,15 @@ async def my_order(callback_query: types.CallbackQuery):
         show_order_message = (await bot.send_message(callback_query.from_user.id,text = f"*Выберите номер заказа для просмотра*\n\n", parse_mode = 'Markdown', reply_markup = show_order)).message_id
     else:
         await bot.send_message(callback_query.message.chat.id, "Похоже вы еще не сделали ни одного заказа🤨", reply_markup = Inline_keyboard.returnProfil)
+
+def read_logs():
+    with open("bot_logs.txt", "r") as file:
+        return file.readlines()
+
+@dp.message_handler(commands=['status'])
+async def status_command(message):
+    with open("bot_logs.txt", "rb") as log_file:
+        await bot.send_document(message.chat.id, log_file)
 
 @dp.callback_query_handler(lambda c: c.data.startswith('order'))
 async def handle_category_choice(callback_query: types.CallbackQuery):
@@ -677,4 +696,9 @@ async def handle_category_choice(callback_query: types.CallbackQuery):
     await corsina.edit_cart_Delete(bot, callback_query, corzinaEdit)
 
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates = True)
+    try:
+        logger.info(f"\nSTATUS: Бот запущен.\n")
+        executor.start_polling(dp,skip_updates = True)
+    except Exception as e:
+        logger.error(f"\nERROR: {e}\n")
+
