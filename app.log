@@ -103,3 +103,483 @@ STATUS: Бот запущен.
 2024-01-08 04:19:17,785 - INFO - Start polling.
 2024-01-08 04:20:43,537 - INFO - Stop polling...
 2024-01-08 04:20:43,538 - WARNING - Goodbye!
+2024-01-08 04:20:45,574 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-08 04:20:45,828 - INFO - Bot: ShazamBot [@RecognizeYourTrackbot]
+2024-01-08 04:20:45,956 - WARNING - Updates were skipped successfully.
+2024-01-08 04:20:45,957 - INFO - Start polling.
+2024-01-08 16:19:32,576 - INFO - Stop polling...
+2024-01-08 16:19:32,577 - WARNING - Goodbye!
+2024-01-09 01:27:39,829 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:27:40,053 - INFO - Bot: ShazamBot [@RecognizeYourTrackbot]
+2024-01-09 01:27:40,183 - WARNING - Updates were skipped successfully.
+2024-01-09 01:27:40,184 - INFO - Start polling.
+2024-01-09 01:28:17,573 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-20' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=ChatNotFound('Chat not found')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 75, in send_welcome
+    await bot.send_photo(-1002050217323, photo = img_url, caption = text)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 561, in send_photo
+    result = await self.request(api.Methods.SEND_PHOTO, payload, files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.ChatNotFound: Chat not found
+2024-01-09 01:30:22,262 - INFO - Stop polling...
+2024-01-09 01:30:22,262 - WARNING - Goodbye!
+2024-01-09 01:30:23,350 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:30:23,541 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:30:23,659 - WARNING - Updates were skipped successfully.
+2024-01-09 01:30:23,659 - INFO - Start polling.
+2024-01-09 01:30:59,732 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-19' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=RetryAfter('Flood control exceeded. Retry in 38 seconds.')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 75, in send_welcome
+    await bot.send_photo(chat_id = -1002050217323, photo = img_url, caption = text)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 561, in send_photo
+    result = await self.request(api.Methods.SEND_PHOTO, payload, files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 111, in check_result
+    raise exceptions.RetryAfter(parameters.retry_after)
+aiogram.utils.exceptions.RetryAfter: Flood control exceeded. Retry in 38 seconds.
+2024-01-09 01:32:00,605 - INFO - Stop polling...
+2024-01-09 01:32:00,606 - WARNING - Goodbye!
+2024-01-09 01:32:02,017 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:32:02,223 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:32:02,366 - WARNING - Updates were skipped successfully.
+2024-01-09 01:32:02,367 - INFO - Start polling.
+2024-01-09 01:32:50,069 - INFO - Stop polling...
+2024-01-09 01:32:50,070 - WARNING - Goodbye!
+2024-01-09 01:33:53,059 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:33:53,270 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:33:53,380 - WARNING - Updates were skipped successfully.
+2024-01-09 01:33:53,380 - INFO - Start polling.
+2024-01-09 01:38:13,200 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-13' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=BadRequest('Message caption is too long')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 76, in send_welcome
+    await bot.send_photo(chat_id = -1002050217323, photo = img_url, caption = text)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 561, in send_photo
+    result = await self.request(api.Methods.SEND_PHOTO, payload, files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 141, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Message caption is too long
+2024-01-09 01:47:35,852 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-95' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=BadRequest('Message caption is too long')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 76, in send_welcome
+    if img_url:
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 561, in send_photo
+    result = await self.request(api.Methods.SEND_PHOTO, payload, files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 141, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Message caption is too long
+2024-01-09 01:49:51,233 - INFO - Stop polling...
+2024-01-09 01:49:51,234 - WARNING - Goodbye!
+2024-01-09 01:49:53,154 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:49:53,363 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:49:53,476 - WARNING - Updates were skipped successfully.
+2024-01-09 01:49:53,477 - INFO - Start polling.
+2024-01-09 01:50:04,070 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-37' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=TypeError("'<' not supported between instances of 'str' and 'int'")>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 77, in send_welcome
+    if text_current < 128:
+       ^^^^^^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'str' and 'int'
+2024-01-09 01:50:12,860 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-44' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=TypeError("'<' not supported between instances of 'str' and 'int'")>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 77, in send_welcome
+    if text_current < 128:
+       ^^^^^^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'str' and 'int'
+2024-01-09 01:50:47,931 - INFO - Stop polling...
+2024-01-09 01:50:47,931 - WARNING - Goodbye!
+2024-01-09 01:50:49,471 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:50:49,654 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:50:49,770 - WARNING - Updates were skipped successfully.
+2024-01-09 01:50:49,770 - INFO - Start polling.
+2024-01-09 01:52:13,083 - INFO - Stop polling...
+2024-01-09 01:52:13,084 - WARNING - Goodbye!
+2024-01-09 01:52:14,502 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:52:14,794 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:52:14,902 - WARNING - Updates were skipped successfully.
+2024-01-09 01:52:14,903 - INFO - Start polling.
+2024-01-09 01:53:21,592 - INFO - Stop polling...
+2024-01-09 01:53:21,592 - WARNING - Goodbye!
+2024-01-09 01:53:23,242 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:53:23,406 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:53:23,515 - WARNING - Updates were skipped successfully.
+2024-01-09 01:53:23,515 - INFO - Start polling.
+2024-01-09 01:54:23,087 - INFO - Stop polling...
+2024-01-09 01:54:23,087 - WARNING - Goodbye!
+2024-01-09 01:54:24,178 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 01:54:24,386 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 01:54:24,497 - WARNING - Updates were skipped successfully.
+2024-01-09 01:54:24,497 - INFO - Start polling.
+2024-01-09 14:59:11,222 - INFO - Stop polling...
+2024-01-09 14:59:11,223 - WARNING - Goodbye!
+2024-01-09 14:59:13,437 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 14:59:13,714 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 14:59:13,843 - WARNING - Updates were skipped successfully.
+2024-01-09 14:59:13,843 - INFO - Start polling.
+2024-01-09 14:59:36,919 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-19' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=KeyError('IMG')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 73, in send_welcome
+    img_url_next = next_item["IMG"]
+                   ~~~~~~~~~^^^^^^^
+KeyError: 'IMG'
+2024-01-09 15:02:11,790 - INFO - Stop polling...
+2024-01-09 15:02:11,791 - WARNING - Goodbye!
+2024-01-09 15:02:12,890 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 15:02:13,095 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 15:02:13,203 - WARNING - Updates were skipped successfully.
+2024-01-09 15:02:13,203 - INFO - Start polling.
+2024-01-09 15:05:50,711 - INFO - Stop polling...
+2024-01-09 15:05:50,712 - WARNING - Goodbye!
+2024-01-09 15:05:51,722 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 15:05:52,151 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 15:05:52,285 - WARNING - Updates were skipped successfully.
+2024-01-09 15:05:52,285 - INFO - Start polling.
+2024-01-09 15:06:02,392 - INFO - Stop polling...
+2024-01-09 15:06:02,398 - WARNING - Goodbye!
+2024-01-09 15:06:03,458 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 15:06:03,682 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 15:06:03,793 - WARNING - Updates were skipped successfully.
+2024-01-09 15:06:03,793 - INFO - Start polling.
+2024-01-09 15:08:12,265 - INFO - Stop polling...
+2024-01-09 15:08:12,266 - WARNING - Goodbye!
+2024-01-09 15:08:13,348 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 15:08:13,531 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 15:08:13,664 - WARNING - Updates were skipped successfully.
+2024-01-09 15:08:13,664 - INFO - Start polling.
+2024-01-09 15:08:47,521 - INFO - Stop polling...
+2024-01-09 15:08:47,522 - WARNING - Goodbye!
+2024-01-09 15:08:48,860 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 15:08:49,050 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 15:08:49,164 - WARNING - Updates were skipped successfully.
+2024-01-09 15:08:49,164 - INFO - Start polling.
+2024-01-09 15:09:36,660 - INFO - Stop polling...
+2024-01-09 15:09:36,661 - WARNING - Goodbye!
+2024-01-09 15:09:37,705 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 15:09:37,880 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 15:09:37,990 - WARNING - Updates were skipped successfully.
+2024-01-09 15:09:37,990 - INFO - Start polling.
+2024-01-09 15:13:44,341 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-109' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=MessageNotModified('Message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 629, in callback_handler_2
+    await photo_handler.process_callback(bot, callback_query)
+  File "D:\project\PycharmProjects\ShopTelegramBot\photo_handler.py", line 160, in process_callback
+    await utils.update_photo(bot = bot, chat_id = callback_query.message.chat.id, photo_path = current_photo_path, caption = caption_text, message_id = callback_query.message.message_id, inline_kb = Inline_keyboard.category_product)
+  File "D:\project\PycharmProjects\ShopTelegramBot\utils.py", line 5, in update_photo
+    await bot.edit_message_media(
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 3088, in edit_message_media
+    result = await self.request(api.Methods.EDIT_MESSAGE_MEDIA, payload, files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageNotModified: Message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2024-01-09 15:13:45,626 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-116' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=MessageNotModified('Message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 629, in callback_handler_2
+    await photo_handler.process_callback(bot, callback_query)
+  File "D:\project\PycharmProjects\ShopTelegramBot\photo_handler.py", line 160, in process_callback
+    await utils.update_photo(bot = bot, chat_id = callback_query.message.chat.id, photo_path = current_photo_path, caption = caption_text, message_id = callback_query.message.message_id, inline_kb = Inline_keyboard.category_product)
+  File "D:\project\PycharmProjects\ShopTelegramBot\utils.py", line 5, in update_photo
+    await bot.edit_message_media(
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 3088, in edit_message_media
+    result = await self.request(api.Methods.EDIT_MESSAGE_MEDIA, payload, files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageNotModified: Message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2024-01-09 15:13:46,968 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-121' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=UnboundLocalError("cannot access local variable 'caption_text' where it is not associated with a value")>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 629, in callback_handler_2
+    await photo_handler.process_callback(bot, callback_query)
+  File "D:\project\PycharmProjects\ShopTelegramBot\photo_handler.py", line 160, in process_callback
+    await utils.update_photo(bot = bot, chat_id = callback_query.message.chat.id, photo_path = current_photo_path, caption = caption_text, message_id = callback_query.message.message_id, inline_kb = Inline_keyboard.category_product)
+                                                                                                                             ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'caption_text' where it is not associated with a value
+2024-01-09 15:13:50,790 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-135' coro=<Dispatcher._process_polling_updates() done, defined at D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=MessageToEditNotFound('Message to edit not found')>
+Traceback (most recent call last):
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\main.py", line 639, in callback_handler_3
+    await more_category.process_callback(bot, callback_query)
+  File "D:\project\PycharmProjects\ShopTelegramBot\more_category.py", line 64, in process_callback
+    await bot.edit_message_media(
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\bot.py", line 3088, in edit_message_media
+    result = await self.request(api.Methods.EDIT_MESSAGE_MEDIA, payload, files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\bot\api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "D:\project\PycharmProjects\ShopTelegramBot\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageToEditNotFound: Message to edit not found
+2024-01-09 15:17:33,121 - INFO - Stop polling...
+2024-01-09 15:17:33,121 - WARNING - Goodbye!
+2024-01-09 15:17:34,548 - INFO - 
+STATUS: Бот запущен.
+
+2024-01-09 15:17:34,790 - INFO - Bot: beta1 [@ededeBetabot]
+2024-01-09 15:17:34,903 - WARNING - Updates were skipped successfully.
+2024-01-09 15:17:34,903 - INFO - Start polling.
+2024-01-09 15:36:43,073 - INFO - Stop polling...
+2024-01-09 15:36:43,074 - WARNING - Goodbye!

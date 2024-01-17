@@ -1,3 +1,5 @@
+import asyncio
+import json
 import logging
 import random
 import sqlite3
@@ -31,6 +33,7 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
+
 class PaymentState(StatesGroup):
     ASK_NAME = State()
     ASK_REGION = State()
@@ -45,6 +48,40 @@ class PaymentState(StatesGroup):
 storage = MemoryStorage()
 bot = Bot(token = config.BOT_TOKEN)
 dp = Dispatcher(bot, storage = storage)
+
+
+
+
+
+
+
+
+@dp.message_handler(commands = ['send'])
+async def send_welcome(message: types.Message):
+    with open("its_my_planner.json","r",encoding = 'utf-8') as json_file:
+        data = json.load(json_file)
+    data.reverse()
+    # Перебираем элементы JSON-структуры
+    for i in range(len(data) - 1):
+        current_item = data[i]
+
+        text_current = current_item["text"].replace("? ","")
+        img_url_current = current_item["IMG"]
+
+
+        # Проверка на одинаковые ссылки и больший текст
+
+        if 30 < len(text_current) < 128:
+            if img_url_current:
+                await bot.send_photo(chat_id = -1002050217323, photo = img_url_current, caption = text_current)
+
+            else:
+                await bot.send_message(-1002050217323, text_current)
+        await asyncio.sleep(3)
+
+
+
+
 
 
 @dp.message_handler(commands = ['start'])
