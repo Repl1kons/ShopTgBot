@@ -10,9 +10,9 @@ from aiogram.types import InputFile
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from keyboards.Inline import Inline_keyboard
-import logging
-
-logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# import logging
+#
+# logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class SetAmount(StatesGroup):
@@ -85,8 +85,8 @@ async def start_articul(bot, chat_id, articul_numb):
                                             "Если все правильно, то вы можете обратиться к нам за помощью (в команде 🆘 Помощь или /help)\n\n"
                                             "Попробуйте ввести артикул заново")
     except Exception as e:
-        logging.error(f"Ошибка при обработке start_articul: {e}",exc_info = True)
-
+        # logging.error(f"Ошибка при обработке start_articul: {e}",exc_info = True)
+        print(e)
 
 async def set_amount_art(bot, message: types.Message, state: FSMContext):
     global articul_data

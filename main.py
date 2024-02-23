@@ -1,8 +1,7 @@
-import asyncio
-import json
 import logging
 import random
 import sqlite3
+from contextlib import suppress
 
 import catalog
 import find_articul
@@ -22,16 +21,41 @@ from keyboards.Markup import Markup_keyboards
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from keyboards.Inline import Inline_keyboard
+from pymongo.errors import DuplicateKeyError
+from motor.motor_asyncio import AsyncIOMotorClient
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-logger = logging.getLogger('Shop-bot')
 
-logger.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger('Shop-bot')
+#
+# logger.setLevel(logging.INFO)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#
+# file_handler = logging.FileHandler("bot_logs.txt")
+# file_handler.setFormatter(formatter)
+#
+# logger.addHandler(file_handler)
 
-file_handler = logging.FileHandler("bot_logs.txt")
-file_handler.setFormatter(formatter)
 
-logger.addHandler(file_handler)
+import gspread
+
+# async def init_image_caption():
+#     image_captions = []
+#
+#     gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+#     sh = gc.open("ShopTgTable")
+#     worksheet = sh.sheet1
+#     for index, row in enumerate(worksheet.get_all_values()):
+#         if index == 0:
+#             continue  # Пропускаем 1 строку
+#         if row:
+#             category = row[0]
+#             subcategories = []
+#             for i in range(1, len(row), 6):
+#                 subcategory = [row[i], row[i + 1], row[i + 2]]
+#                 subcategories.append(subcategory)
+#             image_captions.append([category, subcategories])
+#     print(image_captions)
 
 
 class PaymentState(StatesGroup):
@@ -48,39 +72,8 @@ class PaymentState(StatesGroup):
 storage = MemoryStorage()
 bot = Bot(token = config.BOT_TOKEN)
 dp = Dispatcher(bot, storage = storage)
-
-
-
-
-
-
-
-
-@dp.message_handler(commands = ['send'])
-async def send_welcome(message: types.Message):
-    with open("its_my_planner.json","r",encoding = 'utf-8') as json_file:
-        data = json.load(json_file)
-    data.reverse()
-    # Перебираем элементы JSON-структуры
-    for i in range(len(data) - 1):
-        current_item = data[i]
-
-        text_current = current_item["text"].replace("? ","")
-        img_url_current = current_item["IMG"]
-
-
-        # Проверка на одинаковые ссылки и больший текст
-
-        if 30 < len(text_current) < 128:
-            if img_url_current:
-                await bot.send_photo(chat_id = -1002050217323, photo = img_url_current, caption = text_current)
-
-            else:
-                await bot.send_message(-1002050217323, text_current)
-        await asyncio.sleep(3)
-
-
-
+cluster = AsyncIOMotorClient(host = 'localhost:27017')
+db = cluster.ShopTgBot
 
 
 
@@ -89,6 +82,72 @@ async def send_welcome(message: types.Message):
     start_param = message.get_args()
     print(start_param)
 
+    user_data = await db.User.find_one({'_id': message.from_user.id})
+
+    if user_data:
+        # Если пользователь уже есть, выводим сообщение
+        await message.answer("Вы уже зарегистрированы в базе данных.")
+    else:
+        with suppress(DuplicateKeyError):
+            await db.User.insert_one(dict(
+                _id = message.from_user.id,
+                data = {
+                    'name': '',
+                    'age': 0,
+                    'phone': "",
+                    'email': "",
+                    'first_name': message.from_user.first_name,
+                    'last_name': message.from_user.last_name,
+                    'username': message.from_user.username,
+                    'language': message.from_user.language_code,
+                    'is_bot': message.from_user.is_bot,
+                    'tg_premium': message.from_user.is_premium
+
+                },
+                currency_date = {
+                    'name': '',
+                    'week': '',
+                    'day': '',
+                    'eventId': ''
+                }
+            ))
+
+            await db.State.insert_one(dict(
+                _id = message.from_user.id,
+                appointment = {
+                    'name': '',
+                    'age': 0,
+                    'requests': '',
+                    'day': '',
+                    'time': ''
+                },
+                tarif_marafons = {
+                    'name': '',
+                    'age': 0,
+                    'marathon': '',
+                    'tarif': '',
+                    'waited': '',
+                    'target': '',
+                    'link': ''
+                },
+                notebook = {
+                    'cur_img_ind': 0,
+                    'path_more': '',
+                    'path_name': '',
+                    'price': 0,
+                    'amount': 1,
+                    'path': '',
+                    'text': '',
+                    'product_name': '',
+                    'more': {
+                        'cur_img_ind': 0
+                    }
+                }
+
+            ))
+
+            await message.answer("Вы успешно зарегистрированы в базе данных.")
+    # await init_image_caption()
 
     welcome_message = \
         f"*🎉 Здравствуй, {message.from_user.first_name}!*\n\n" \
@@ -98,10 +157,7 @@ async def send_welcome(message: types.Message):
         f"- 🌟 *И многое другое*\n\n" \
         f"*Создано специально для it's my planner | by A-STUDENT!*"
         # f"Вы передали параметр: {start_param}"
-    # if message.chat.id == config.IS_ADMIN:
-    #     await bot.send_message(message.chat.id,welcome_message,reply_markup = Markup_keyboards.main_menu_admin,
-    #                            parse_mode = 'Markdown')
-    # else:
+
     await bot.send_message(message.chat.id, welcome_message, reply_markup = Markup_keyboards.main_menu,
                                parse_mode = 'Markdown')
     if start_param.isdigit():
@@ -554,9 +610,12 @@ async def process_house(message: types.Message, state: FSMContext):
                                 reply_markup = Inline_keyboard.user_data)
     await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
 
-@dp.callback_query_handler(lambda c: c.data == 'back_to_choose')
+@dp.callback_query_handler(lambda c: c.data.startswith('back_to_choose'))
 async def callback_handler_2(callback_query: types.CallbackQuery):
-    await photo_handler.process_callback(bot, callback_query)
+    product = callback_query.data.split('_')[1]
+    cur_img_indx = int(callback_query.data.split('_')[2])
+    cur_img_capt = int(callback_query.data.split('_')[3])
+    await photo_handler.process_callback(bot, callback_query, cur_img_indx, cur_img_capt, product, db)
 
 @dp.callback_query_handler(lambda c: c.data == 'data-enter', state = PaymentState.CONFIRMATION)
 async def process_data_enter(callback_query: types.CallbackQuery, state: FSMContext):
@@ -622,9 +681,18 @@ async def process_data_edit(callback_query: types.CallbackQuery, state: FSMConte
                                               text = "Опрос начинается заново. Введите ваше имя в формате ФИО: ")).message_id
 
 
-@dp.callback_query_handler(lambda c: c.data in ['back', 'forward', 'choose_enter_categorical', 'more'])
+
+
+dp.callback_query_handler(lambda c: c.data.startswith(('back_notebook_more', 'forward_notebook_more', 'pay_notebook_more', 'back_notebook_more')))
 async def callback_handler_2(callback_query: types.CallbackQuery):
-    await photo_handler.process_callback(bot, callback_query)
+    cur_img_ind = int(callback_query.data.split('_')[3])
+
+@dp.callback_query_handler(lambda c: c.data.startswith(('categoryBack', 'categoryForward', 'choose-enter-categorical', 'categoryMore')))
+async def callback_handler_2(callback_query: types.CallbackQuery):
+    product = callback_query.data.split('_')[1]
+    cur_img_indx = int(callback_query.data.split('_')[2])
+    cur_img_capt = int(callback_query.data.split('_')[3])
+    await photo_handler.process_callback(bot, callback_query, cur_img_indx, cur_img_capt, product, db)
 
 
 @dp.callback_query_handler(lambda c: c.data in ['back_1', 'forward_1', 'back_return_1'])
@@ -637,23 +705,25 @@ async def callback_handler_3(callback_query: types.CallbackQuery):
     await more_category.process_callback(bot, callback_query)
 
 
-@dp.callback_query_handler(lambda c: c.data in ['forward-enter', 'choose_enter', 'amount_sum', 'amount_min'])
+@dp.callback_query_handler(lambda c: c.data.startswith(('forward-enter', 'back-enter', 'amount-sum', 'amount-min', 'product-choose-enter')))
 async def callback_handler_4(callback_query: types.CallbackQuery):
-    await photo_hendler_two.process_callback(bot, callback_query)
+    cur_img_indx = int(callback_query.data.split('_')[1])
+    cur_img_cap = int(callback_query.data.split('_')[2])
+    await photo_hendler_two.process_callback(bot, callback_query, cur_img_indx, cur_img_cap, db)
 
+# @dp.callback_query_handler(lambda c: c.data in ['choose_enter', 'amount_sum', 'amount_min', 'back-enter'])
+# async def callback_handler_4(callback_query: types.CallbackQuery):
+#     await photo_hendler_two.process_callback(bot, callback_query)
 
-@dp.callback_query_handler(lambda c: c.data == 'back-enter')
-async def callback_handler_4(callback_query: types.CallbackQuery):
-    await photo_hendler_two.process_callback(bot, callback_query)
-
-@dp.callback_query_handler(lambda c: c.data in ['choose_enter_1', 'amount_sum_1', 'amount_min_1', 'set_amount'])
-async def callback_handler_4(callback_query: types.CallbackQuery, state: FSMContext):
-    await find_articul.process_callback(bot, callback_query, state)
+# @dp.callback_query_handler(lambda c: c.data in ['choose_enter_1', 'amount_sum_1', 'amount_min_1', 'set_amount'])
+# async def callback_handler_4(callback_query: types.CallbackQuery, state: FSMContext):
+#     await find_articul.process_callback(bot, callback_query, state)
 
 @dp.pre_checkout_query_handler(lambda query: True)
 async def pre_checkout_query(pre_checkout_q: types.PreCheckoutQuery):
     try:
         await bot.answer_pre_checkout_query(pre_checkout_q.id, ok = True)
+        print(f"pre_checkout_q.id: {pre_checkout_q.id}")
     except Exception as e:
         print(f"Pay error: {e}")
 
@@ -731,8 +801,9 @@ async def handle_category_choice(callback_query: types.CallbackQuery):
 
 if __name__ == '__main__':
     try:
-        logger.info(f"\nSTATUS: Бот запущен.\n")
+        # logger.info(f"\nSTATUS: Бот запущен.\n")
         executor.start_polling(dp,skip_updates = True)
     except Exception as e:
-        logger.error(f"\nERROR: {e}\n")
-
+        # logger.error(f"\nERROR: {e}\n")
+        print(e)
+#
