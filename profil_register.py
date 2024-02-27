@@ -82,9 +82,9 @@ async def get_indecs(bot, message, state: FSMContext):
     await state.get_state(ProfilState.GET_INDECS)
     await ProfilState.next()
 
-async def conf(bot, message, state: FSMContext):
+async def conf(bot, message, state: FSMContext, db):
     async with state.proxy() as data:
-        database.add_user(
+        await database.add_user(
             user_id = message.from_user.id,
             name = data['name'],
             city = data['city'],
@@ -92,13 +92,14 @@ async def conf(bot, message, state: FSMContext):
             street = data['street'],
             number_house = data['house'],
             apartment = data['apartment'],
-            indecs = data['indecs']
-        )
+            indecs = data['indecs'],
+            db = db)
+
     print(message.from_user.id)
     user_id = message.from_user.id
-    user_data = database.get_user_data(user_id)
+    user_data = await db.User.find_one({'_id': message.from_user.id})
 
-    full_name = user_data[0].split(' ')
+    full_name = user_data['data']['name'].split(' ')
     first_name = full_name[1]
     last_name = full_name[0]
     surname = full_name[2]
@@ -113,12 +114,12 @@ async def conf(bot, message, state: FSMContext):
                 f"├ <i>Имя:</i> {first_name}\n"
                 f"└ <i>Отчество:</i> {surname}\n\n"
                 f"🏠 <b>Адрес:</b>\n"
-                f"┌ <i>Область:</i> {user_data[2]}\n"
-                f"├ <i>Город:</i> {user_data[1]}\n"
-                f"├ <i>Улица:</i> {user_data[3]}\n"
-                f"├ <i>Дом:</i> {user_data[4]}\n"
-                f"├ <i>Квартира:</i> {user_data[5]}\n"
-                f"└ <i>Индекс:</i> {user_data[6]}\n"),
+                f"┌ <i>Область:</i> {user_data['data']['region']}\n"
+                f"├ <i>Город:</i> {user_data['data']['city']}\n"
+                f"├ <i>Улица:</i> {user_data['data']['street']}\n"
+                f"├ <i>Дом:</i> {user_data['data']['number_house']}\n"
+                f"├ <i>Квартира:</i> {user_data['data']['apartment']}\n"
+                f"└ <i>Индекс:</i> {user_data['data']['indecs']}\n"),
         reply_markup = Inline_keyboard.profil_data_1,
         parse_mode = 'HTML'
     )

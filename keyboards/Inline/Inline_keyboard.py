@@ -23,7 +23,7 @@ show_basket_add.add(catalog_basket, show_basket)
 
 
 """Клавиатура каталога товаров"""
-product_categories = ['📔 Ежедневники', '💳 Кард-холдеры', '🖼 Обложки', "🔍 Поиск артикула"]
+product_categories = ['📔 Ежедневники', '💳 Кард-холдеры', '🖼 Обложки'] # add "🔍 Поиск артикула"
 show_catalogs = InlineKeyboardMarkup(row_width = 1)
 for category in product_categories:
     catalogs_button = InlineKeyboardButton(text = category, callback_data = f'category_{category}')
@@ -55,13 +55,14 @@ def create_category_more_ceyboard(cur_img_indx):
     return category_product_1
 
 
-category_product_1 = InlineKeyboardMarkup(row_width = 2)
-btn_back_1 = InlineKeyboardButton(text = '⬅', callback_data = 'back_1')
-btn_forward_1 = InlineKeyboardButton(text = '➡', callback_data = 'forward_1')
-btn_enter = InlineKeyboardButton(text = '✅ Выбрать категорию',callback_data = 'choose_enter_categorical')
-back_return_1 = InlineKeyboardButton(text = '🚪 Назад', callback_data = 'more_back_return')
-category_product_1.add(btn_back_1, btn_forward_1, back_return_1, btn_enter)
-
+def create_more_cat(current_image_index):
+    category_product_1 = InlineKeyboardMarkup(row_width = 2)
+    btn_back_1 = InlineKeyboardButton(text = '⬅', callback_data = f'move_more_back_{current_image_index}')
+    btn_forward_1 = InlineKeyboardButton(text = '➡', callback_data = f'move_more_forward_{current_image_index}')
+    btn_enter = InlineKeyboardButton(text = '✅ Выбрать категорию',callback_data = f'choose_enter_categorical_{current_image_index}')
+    back_return_1 = InlineKeyboardButton(text = '🚪 Назад', callback_data = f'more_back_return_{current_image_index}')
+    category_product_1.add(btn_back_1, btn_forward_1, back_return_1, btn_enter)
+    return category_product_1
 
 
 # category_product_1 = InlineKeyboardMarkup(row_width = 2)
@@ -78,7 +79,7 @@ def create_category_product_keyboard(cur_img_index, cur_img_cap):
     amount_sum = InlineKeyboardButton(text = '➕', callback_data = f'amount-sum_{cur_img_index}_{cur_img_cap}')
     amount_min = InlineKeyboardButton(text = '➖', callback_data = f'amount-min_{cur_img_index}_{cur_img_cap}')
     btn_enter = InlineKeyboardButton(text = '✅ Добавить в корзину', callback_data = f'product-choose-enter_{cur_img_index}_{cur_img_cap}')
-    return_back_to_choose_categorical = InlineKeyboardButton(text = '🚪 Вернуться', callback_data = 'back_to_choose')
+    return_back_to_choose_categorical = InlineKeyboardButton(text = '🚪 Вернуться', callback_data = f'back-to-choose_{cur_img_index}_{cur_img_cap}')
     product_show.add(btn_back, btn_forward, amount_min, amount_sum, return_back_to_choose_categorical, btn_enter)
 
     return product_show

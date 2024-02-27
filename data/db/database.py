@@ -1,104 +1,20 @@
 import sqlite3
 
 """База данных"""
-def add_user(user_id, name, city, region, street, number_house, apartment, indecs):
-    sql = '''
-        INSERT INTO users (user_id, name_str, city, region, street, number_house, apartment, indecs) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    '''
-    with sqlite3.connect('data/user_corsina.db') as conn:
-        cursor = conn.cursor()
-        try:
-            cursor.execute(sql, (user_id, name, city, region, street, number_house, apartment, indecs))
-            conn.commit()
-        except sqlite3.Error as e:
-            conn.rollback()
-            print(f"Error inserting user: {e}")
+async def add_user(user_id, name, city, region, street, number_house, apartment, indecs, db):
+    await db.User.update_one(dict(
+        _id = user_id),
+        {
+            "$set": {'data.name': name,
+                     'data.city': city,
+                     'data.region': region,
+                     'data.street': street,
+                     'data.number_house': number_house,
+                     'data.apartment': apartment,
+                     'data.indecs': indecs}
+        }
+    )
 
-"""База данных заказов"""
-def add_order(user_id, product_id, quantity, price):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO orders (user_id, product_id, quantity, price) 
-        VALUES (?, ?, ?, ?)
-    ''', (user_id, product_id, quantity, price))
-    conn.commit()
-    conn.close()
-
-
-async def add_product(articul, name, variant, price, photo_path):
-    conn = sqlite3.connect('data/bot_product.db')
-    cursor = conn.cursor()
-
-    # Проверка, существует ли уже продукт с этим артикулом
-    cursor.execute("SELECT * FROM product WHERE articul = ?", (articul,))
-    product = cursor.fetchone()
-
-    if product is None:
-        # Если продукта нет, вставляем новую запись
-        cursor.execute('''
-            INSERT INTO product (articul, name_product, variant, price, photo_path) 
-            VALUES (?, ?, ?, ?, ?)
-        ''', (articul, name, variant, price, photo_path))
-    else:
-        # Если продукт существует, обновляем его данные
-        cursor.execute('''
-            UPDATE product 
-            SET name_product = ?, variant = ?, price = ?, photo_path = ?
-            WHERE articul = ?
-        ''', (name, variant, price, photo_path, articul))
-
-    conn.commit()
-    conn.close()
-
-
-def delete_order_corsina(id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM cart_items WHERE id = ?",(id,))
-    conn.commit()
-    conn.close()
-# def update_all_amount():
-#     conn = sqlite3.connect('data/bot_product.db')
-#     cursor = conn.cursor()
-#
-#     # Обновление поля all_amount во всех записях
-#     cursor.execute('''
-#         UPDATE product SET all_amount = 50
-#     ''')
-#
-#     conn.commit()
-#     conn.close()
-
-
-
-def delete_user(user_id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM users WHERE user_id = ?', (user_id,))
-    conn.commit()
-    conn.close()
-
-def is_name_filled(user_id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT name_str FROM users WHERE user_id = ?', (user_id,))
-    user_name = cursor.fetchone()
-    conn.commit()
-    conn.close()
-    return user_name is not None and user_name[0] != ''
-
-
-
-def get_user_data(user_id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT name_str, city, region, street, number_house, apartment, indecs FROM users WHERE user_id = ?', (user_id,))
-    user_data = cursor.fetchone()
-    conn.commit()
-    conn.close()
-    return user_data if user_data else None
 
 def get_all_amount(articul):
     conn = sqlite3.connect('data/bot_product.db')
@@ -109,15 +25,6 @@ def get_all_amount(articul):
     conn.close()
     return all_amount if all_amount else None
 
-def get_price(articul):
-    conn = sqlite3.connect('data/bot_product.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT price FROM product WHERE articul = ?', (articul,))
-    price = cursor.fetchone()
-    conn.commit()
-    conn.close()
-    return price if price else None
-
 
 def update_all_amount(articul, new_amount):
     conn = sqlite3.connect('data/bot_product.db')
@@ -127,21 +34,7 @@ def update_all_amount(articul, new_amount):
     conn.commit()
     conn.close()
 
-def update_all_amount_corzina(id, new_amount):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    # Обновляем all_amount для заданного артикула
-    cursor.execute('UPDATE cart_items SET quantity = ? WHERE id = ?',(new_amount,id))
-    conn.commit()
-    conn.close()
 
-def update_all_amount_corzina_new_order(user_id, articul, new_amount):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    # Обновляем all_amount для заданного артикула
-    cursor.execute('UPDATE cart_items SET quantity = ? WHERE articul = ? AND user_id = ?',(new_amount,articul, user_id, ))
-    conn.commit()
-    conn.close()
 
 
 def update_status_order(id_order, status):
@@ -152,32 +45,8 @@ def update_status_order(id_order, status):
     conn.commit()
     conn.close()
 
-def get_articul_corsina(user_id, articul):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM cart_items WHERE user_id = ? AND articul = ?',(user_id, articul, ))
-    order = cursor.fetchall()
-    conn.commit()
-    conn.close()
-    return order if order else None
 
-def get_total_price(user_id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT total_price FROM cart_items WHERE user_id = ?',(user_id,))
-    total_price = cursor.fetchone()
-    conn.commit()
-    conn.close()
-    return total_price if total_price else None
 
-def get_total_quantity(id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT quantity FROM cart_items WHERE id = ?',(id,))
-    quantity = cursor.fetchone()
-    conn.commit()
-    conn.close()
-    return quantity if quantity else None
 
 def get_user_order(user_id):
     conn = sqlite3.connect('data/bot_users_order.db')

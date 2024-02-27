@@ -15,13 +15,13 @@ async def main(page: Page):
     async def auth(e):
         _login = int(login_input.value)
 
-        if _login == config.ID_ADMIN:
-            user = data.db.database.get_user_data(_login)
-            await page.clean_async()
-            await page.add_async(Text(f"Данные пользователя:\n"
-                                      f"Имя: {user[0]}\n"
-                                      f"Город: {user[1]}"))
-            await bot.send_message(_login, f"{user[0]} has new authorization")
+        # if _login == config.ID_ADMIN:
+        #     # user = data.db.database.get_user_data(_login)
+        #     await page.clean_async()
+        #     await page.add_async(Text(f"Данные пользователя:\n"
+        #                               f"Имя: {user[0]}\n"
+        #                               f"Город: {user[1]}"))
+        #     await bot.send_message(_login, f"{user[0]} has new authorization")
 
     login_input = TextField(text_align=TextAlign.CENTER, label='ID')
 

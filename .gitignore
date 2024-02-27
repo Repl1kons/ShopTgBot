@@ -2,6 +2,6 @@
 __pycache__/
 .log*
 .pyc*
-photo_dir_1/
-photo_dir_2/
-.txt*
+photo
+venv
+test.py

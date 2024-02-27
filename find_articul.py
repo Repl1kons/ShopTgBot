@@ -127,7 +127,7 @@ async def process_callback(bot, callback_query, state):
         if new_amount_1[0] > 0:
             category = articul_data[4].split('_')[2]
             await corsina.add_to_cart(callback_query.message.chat.id,articul_data[1],articul_data[0],articul_data[2],amount_to_buy,articul_data[3],category)
-            await db.database.add_product(articul_data[0],articul_data[1],articul_data[2],articul_data[3],articul_data[4])
+            # await db.database.add_product(articul_data[0],articul_data[1],articul_data[2],articul_data[3],articul_data[4])
             await bot.send_message(callback_query.message.chat.id,
                                    f"Товар {articul_data[1]}:\n\nАртикул: {articul_data[0]}\nВыбранный вариант: {articul_data[2]}\nКоличество: {amount_to_buy}\nЦена: {articul_data[3] * amount_to_buy}\n\nБыл успешно добавлен в корзину 💵‍",
                                    reply_markup = Inline_keyboard.show_basket_add)

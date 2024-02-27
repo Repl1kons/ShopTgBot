@@ -1,26 +1,23 @@
 from aiogram import types, Dispatcher
 from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
-
-import data.db.database
-from data.db import database
+import gspread
 from keyboards.Inline import Inline_keyboard
 import sqlite3
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
 
-def create_cart_keyboard(user_id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, item_name, quantity, articul FROM cart_items WHERE user_id = ?", (user_id,))
-    cart_items = cursor.fetchall()
-    conn.close()
-    if cart_items:
+async def create_cart_keyboard(user_id, db):
+    user_corsina = await db.Corsina.find_one({'_id': user_id})
+    user_corsina_data = user_corsina['data']
+
+    if user_corsina_data:
         keyboard = InlineKeyboardMarkup(row_width=3)
-        all_amount = database.get_all_amount(cart_items[0][3])
-        print(f"Всего: {all_amount}")
-        for item_id, item_name, quantity, articul in cart_items:
+        for order in user_corsina_data:
 
-            keyboard.insert(InlineKeyboardButton(text=f"{item_name} | {articul} | {quantity} шт.", callback_data=f'corzina_{item_id}'))
+            all_amount = order['max_amount']
+            print(f"Всего: {all_amount}")
+            # for item_id, item_name, quantity, articul in cart_items:
+            print(order)
+            item_id = order['id']
+            keyboard.insert(InlineKeyboardButton(text=f"{order['product_name']} | {order['articul']} | {order['quantity']} шт.", callback_data=f'corzina_{item_id}'))
 
             keyboard.add(
                 InlineKeyboardButton(text="- 1", callback_data=f"corzinaEditMin_{item_id}"),
@@ -29,29 +26,30 @@ def create_cart_keyboard(user_id):
         keyboard.add(InlineKeyboardButton(text = "Назад", callback_data = "show_basket"))
         return keyboard
 
-def create_cart_edit_message(user_id):
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
+async def create_cart_edit_message(user_id, db):
+    user_corsina = await db.Corsina.find_one({'_id': user_id})
+    user_corsina_data = user_corsina['data']
+
     welcome_message = '● Товары:'
     total_price = 0
     item_number = 1
 
-    query = "SELECT id, item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
-    cursor.execute(query,(user_id,))
-    cart_items = cursor.fetchall()
-    conn.close()
-
-    if cart_items:
-        for item in cart_items:
-            amount_price = item[4] * item[5]
+    if user_corsina_data:
+        for order in user_corsina_data:
+            amount_price = order['quantity'] * order['price']
             total_price += amount_price
-            welcome_message += f"\n\n*{item[1]}*\n ┄ Артикул: {item[2]}\n ┄ Вариант: {item[3]}\n{item[4]} шт. x {int(item[5])} ₽ = {int(amount_price)} ₽\n———"
+            welcome_message += f"\n\n*{order['product_name']}*\n ┄ Артикул: {order['articul']}\n ┄ Вариант: {order['selected_variant']}\n{order['quantity']} шт. x {int(order['price'])} ₽ = {int(amount_price)} ₽\n———"
             item_number += 1
 
         # welcome_message += "● Итого: "
 
         return welcome_message
 
+    else:
+
+        welcome_message = f"Корзина пуста"
+
+        return welcome_message
 
 async def add_to_cart(user_id, item_name, articul, selected_variant, quantity, price, selected_category):
     conn = sqlite3.connect('data/user_corsina.db')  # Подключение к базе данных
@@ -68,178 +66,203 @@ async def add_to_cart(user_id, item_name, articul, selected_variant, quantity, p
 
 
 
-async def show_cart(bot, message: types.Message):
-
+async def show_cart(bot, message: types.Message, db):
     user_id = message.from_user.id
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
 
-    query = "SELECT item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
-    cursor.execute(query, (user_id,))
-    cart_items = cursor.fetchall()
-    conn.close()
+    user_corsina = await db.Corsina.find_one({'_id': user_id})
+    user_corsina_data = user_corsina['data']
+    if user_corsina_data:
+        # user_corsina_data = user_corsina['data']
+        # Здесь остальной код, использующий user_corsina_data
 
-    cart_contents = '● Товары:\n'
-    total_price = 0
-    item_number = 1
-    all_order_price = 0
-    all_quantity = 0
+        cart_contents = '● Товары:\n'
+        total_price = 0
+        item_number = 0
+        all_order_price = 0
 
-    for item in cart_items:
-        amount_price = item[3] * item[4]
-        total_price += amount_price
-        cart_contents += f"\n*{item[0]}*\n _┄ Артикул:_ {item[1]}\n ┄ _Вариант:_ {item[2]}\n" \
-                         f"{item[3]} шт. x {int(item[4])} ₽ = {int(amount_price)}" \
-                         f" ₽\n———\n"
-        item_number += 1
-        all_quantity += item[3]
-    all_order_price += total_price
-    cart_contents += f'\n● Итого:\n ┄ {all_quantity} шт. товаров на {int(all_order_price)} ₽\n ┄ Доставка: 300 ₽\n\n'
-    print(all_order_price)
-    global message_id
-    if cart_items:
+        total_amount_price = 0
+
+        for order in user_corsina_data:
+            order_price = int(order['price'])
+            order_quantity = int(order['quantity'])
+            order_amount_price = order_price * order_quantity
+            total_amount_price += order_amount_price
+
+            total_price += order_amount_price
+            cart_contents += (f"\n*{order['product_name']}*\n "
+                              f"_Артикул:_ {order['articul']}\n "
+                              f"_Вариант:_ {order['selected_variant']}\n"
+                              f"{order['quantity']} шт. x {order['price']} ₽\n"
+                              f"Сумма: {order['quantity'] * order['price']} ₽\n"
+                              f"----------\n")
+
+            item_number += order['quantity']
+
+        cart_contents += f'\n● Итого:\n ┄ {item_number} шт. товаров на {total_price} ₽\n ┄ Доставка: 300 ₽\n\n'
+        print(all_order_price)
         cart_contents += f"*Всего к оплате: {int(total_price + 300)} руб.*"
-        message_id = (await bot.send_message(user_id, f"{cart_contents}", reply_markup=Inline_keyboard.keyboard_basket, parse_mode='Markdown')).message_id
+        await bot.send_message(user_id, f"{cart_contents}", reply_markup=Inline_keyboard.keyboard_basket, parse_mode='Markdown')
     else:
-        message_id = (await bot.send_message(user_id, "👻 Ваша корзина пуста 😢")).message_id
+        await bot.send_message(user_id, "👻 Ваша корзина пуста 😢")
 
 
 
-async def edit_cart(bot, message: types.Message):
-    keyboard = create_cart_keyboard(message.from_user.id)
-    current_order_number = None
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
+async def edit_cart(bot, message: types.Message, db):
+    user_corsina = await db.Corsina.find_one({'_id': message.from_user.id})
+    user_corsina_data = user_corsina['data']
 
-    query = "SELECT id, item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
-    cursor.execute(query,(message.from_user.id,))
-    cart_items = cursor.fetchall()
-    conn.close()
+    keyboard = await create_cart_keyboard(message.from_user.id, db)
 
-    if cart_items:
-        welcome_message = create_cart_edit_message(message.from_user.id)
+    if user_corsina_data:
+        welcome_message = await create_cart_edit_message(message.from_user.id, db)
 
-        global message_id
-        message_id = (await bot.send_message(message.from_user.id, welcome_message, reply_markup=keyboard, parse_mode='Markdown')).message_id
+        await bot.send_message(message.from_user.id, welcome_message, reply_markup=keyboard, parse_mode='Markdown')
     else:
         await bot.send_message(message.from_user.id, "Ваша корзина пуста")
 
-async def edit_cart_Delete(bot, callback_query: types.CallbackQuery, corzinaEdit):
-    global message_id
+async def edit_cart_Delete(bot, callback_query: types.CallbackQuery, corzinaEdit, db):
+
+    user_corsina = await db.Corsina.find_one({'_id': callback_query.from_user.id})
+    user_corsina_data = user_corsina['data']
+
+    if user_corsina_data:
+        for order in user_corsina_data:
+            now_amount = int(order['quantity'])
+            max_amount = int(order['max_amount'])
+            worksheet = order['worksheet']
+            articul = order['articul']
+            new_all_amount = max_amount + now_amount
+
+            if int(order['id']) == int(corzinaEdit):
+                gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                sh = gc.open("ShopTgTable")
+                worksheet = sh.worksheet(worksheet)
+                cell = worksheet.find(articul)
+                print(cell.row,cell.col)
+                worksheet.update_cell(cell.row, 5, new_all_amount)
+
+                await db.Corsina.update_one(
+                    {'_id': callback_query.from_user.id},
+                    {'$pull': {'data': {'id': int(corzinaEdit)}}}
+                )
+        new_keyboard = await create_cart_keyboard(callback_query.from_user.id, db)
+        welcome_message = await create_cart_edit_message(callback_query.from_user.id, db)
+
+            # welcome_message += '———\n'
+        await callback_query.message.edit_text(text=welcome_message, reply_markup=new_keyboard, parse_mode='Markdown')
+        if not user_corsina_data:
+            welcome_message = "Ваша корзина теперь пуста"
+            await callback_query.message.edit_text(text=welcome_message, reply_markup=new_keyboard, parse_mode='Markdown')
 
 
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-
-    # Получение товара по номеру
-    cursor.execute("SELECT quantity, articul, item_name, selected_variant, price FROM cart_items WHERE id = ?",(corzinaEdit,))
-    rows = cursor.fetchall()
-
-    show_catalogs = InlineKeyboardMarkup(row_width=3)
-    if rows:
-
-        now_all_amount = database.get_all_amount(rows[0][1])
-        new_all_amount = now_all_amount[0] + rows[0][0]
-        print(new_all_amount)
-        database.update_all_amount(rows[0][1], new_all_amount)
-        database.delete_order_corsina(corzinaEdit)
-        new_keyboard = create_cart_keyboard(callback_query.from_user.id)
-        welcome_message = create_cart_edit_message(callback_query.from_user.id)
-
-        # welcome_message += '———\n'
-        await bot.edit_message_text(chat_id=callback_query.message.chat.id, text=welcome_message, message_id=message_id, reply_markup=new_keyboard, parse_mode='Markdown')
     else:
-        await bot.edit_message_text(chat_id=callback_query.message.chat.id, text="К сожалению вы еще не сделали покупки", message_id=message_id, reply_markup=show_catalogs, parse_mode='Markdown')
-
-async def edit_cart_amount_Sum(bot, callback_query: types.CallbackQuery, corzinaEdit):
-    global message_id
-
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-
-    # Получение товара по номеру
-    cursor.execute("SELECT quantity, articul, item_name, selected_variant, price FROM cart_items WHERE id = ?", (corzinaEdit,))
-    rows = cursor.fetchall()
-    conn.commit()
-    conn.close()
-
-    if rows:
-        for item in rows:
-
-            now_amount = item[0]
-            new_amount = now_amount + 1
-            database.update_all_amount_corzina(corzinaEdit, new_amount)
-        welcome_message = create_cart_edit_message(callback_query.from_user.id)
-        # welcome_message += '———\n'
-        new_keyboard = create_cart_keyboard(callback_query.from_user.id)
-        await bot.edit_message_text(chat_id=callback_query.message.chat.id,
-                                    text=welcome_message, message_id=message_id,
-                                    reply_markup=new_keyboard, parse_mode='Markdown')
-
-
-async def edit_cart_amount_Min(bot, callback_query: types.CallbackQuery, corzinaEdit):
-    welcome_message = '● Товары:'
-    total_price = 0
-    item_number = 1
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-
-    # Получение товара по номеру
-    cursor.execute("SELECT quantity, articul, item_name, selected_variant, price FROM cart_items WHERE id = ?", (corzinaEdit,))
-    rows = cursor.fetchall()
-    conn.commit()
-    conn.close()
-
-    if rows and rows[0][0] > 1:
-        for item in rows:
-            now_amount = item[0]
-            new_amount = now_amount - 1
-        database.update_all_amount_corzina(corzinaEdit, new_amount)
-        welcome_message = create_cart_edit_message(callback_query.from_user.id)
-        # welcome_message += '———\n'
-        new_keyboard = create_cart_keyboard(callback_query.from_user.id)
-        await bot.edit_message_text(chat_id=callback_query.message.chat.id,
-                                    text=welcome_message, message_id=message_id,
-                                    reply_markup=new_keyboard, parse_mode='Markdown')
+        welcome_message = "Ваша корзина теперь пуста"
+        await callback_query.message.edit_text(text=welcome_message, reply_markup=new_keyboard, parse_mode='Markdown')
 
 
 
-async def clear_user_cart(user_id):
-    """ Функция для очистки корзины пользователя в базе данных """
-    conn = sqlite3.connect('data/user_corsina.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM cart_items WHERE user_id = ?", (user_id,))
-    conn.commit()
-    conn.close()
+async def edit_cart_amount_Sum(bot, callback_query: types.CallbackQuery, corzinaEdit, db):
+    user_corsina = await db.Corsina.find_one({'_id': callback_query.from_user.id})
+    user_corsina_data = user_corsina['data']
+    if user_corsina_data:
+        for order in user_corsina_data:
+            now_amount = int(order['quantity'])
+            max_amount = int(order['max_amount'])
+            worksheet = order['worksheet']
+            articul = order['articul']
+            if now_amount < max_amount:
+                new_amount = now_amount + 1
+                tabel_new_amount = max_amount - 1
+                if int(order['id']) == int(corzinaEdit):
+                    gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                    sh = gc.open("ShopTgTable")
+                    worksheet = sh.worksheet(worksheet)
+                    cell = worksheet.find(articul)
+                    print(cell.row,cell.col)
+                    worksheet.update_cell(cell.row,5, tabel_new_amount)
+
+                    await db.Corsina.update_one(
+                        {'_id': callback_query.from_user.id},
+                        {'$set': {'data.$[elem].quantity': new_amount,
+                                  'data.$[elem].max_amount': tabel_new_amount}},
+                        array_filters = [{'elem.id': int(corzinaEdit)}]
+                    )
 
 
-async def process_callback(bot, callback_query: types.CallbackQuery):
+        # После обновления заказа создаем новое сообщение о корзине и обновляем клавиатуру
+        welcome_message = await create_cart_edit_message(callback_query.from_user.id,db)
+        new_keyboard = await create_cart_keyboard(callback_query.from_user.id,db)
+        await callback_query.message.edit_text(text = welcome_message,
+                                               reply_markup = new_keyboard,
+                                               parse_mode = 'Markdown')
+
+
+async def edit_cart_amount_Min(bot, callback_query: types.CallbackQuery, corzinaEdit, db):
+    user_corsina = await db.Corsina.find_one({'_id': callback_query.from_user.id})
+    user_corsina_data = user_corsina['data']
+    if user_corsina_data:
+        for order in user_corsina_data:
+            now_amount = int(order['quantity'])
+            max_amount = int(order['max_amount'])
+            worksheet = order['worksheet']
+            articul = order['articul']
+            if now_amount < max_amount:
+                new_amount = now_amount - 1
+                tabel_new_amount = max_amount + 1
+                if int(order['id']) == int(corzinaEdit):
+                    gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                    sh = gc.open("ShopTgTable")
+                    worksheet = sh.worksheet(worksheet)
+                    cell = worksheet.find(articul)
+                    print(cell.row,cell.col)
+                    worksheet.update_cell(cell.row,5,tabel_new_amount)
+
+                    await db.Corsina.update_one(
+                        {'_id': callback_query.from_user.id},
+                        {'$set': {'data.$[elem].quantity': new_amount,
+                                  'data.$[elem].max_amount': tabel_new_amount}},
+                        array_filters = [{'elem.id': int(corzinaEdit)}]
+                    )
+
+        welcome_message = await create_cart_edit_message(callback_query.from_user.id,db)
+        new_keyboard = await create_cart_keyboard(callback_query.from_user.id,db)
+        await callback_query.message.edit_text(text = welcome_message,
+                                               reply_markup = new_keyboard,
+                                               parse_mode = 'Markdown')
+
+async def process_callback(bot, callback_query: types.CallbackQuery, db):
     user_id = callback_query.from_user.id
 
     if callback_query.data == 'edit_cart':
-        # await bot.delete_message(user_id, callback_query.message.message_id) # удаление сообщения с содержимым корзины
-        await edit_cart(bot, callback_query)
+        await edit_cart(bot, callback_query, db)
 
     elif callback_query.data == 'show_basket':
-        await show_cart(bot, callback_query)
+        await show_cart(bot, callback_query, db)
 
     elif callback_query.data == 'clear_cart':
-        conn = sqlite3.connect('data/user_corsina.db')
-        cursor = conn.cursor()
+        user_corsina = await db.Corsina.find_one({'_id': callback_query.from_user.id})
+        user_corsina_data = user_corsina['data']
 
-        query = "SELECT item_name, articul, selected_variant, quantity, price, selected_category FROM cart_items WHERE user_id = ?"
-        cursor.execute(query,(user_id,))
-        cart_items = cursor.fetchall()
-        conn.close()
+        if user_corsina_data:
+            for order in user_corsina_data:
+                now_amount = int(order['quantity'])
+                max_amount = int(order['max_amount'])
+                worksheet = order['worksheet']
+                articul = order['articul']
 
-        for item in cart_items:
-            articul = item[1]
-            amount = item[3]
-            now_amount = data.db.database.get_all_amount(articul)
-            new_amount = amount + now_amount[0]
-            data.db.database.update_all_amount(articul,new_amount)
+                new_amount = now_amount - 1
+                tabel_new_amount = max_amount + 1
 
-        await clear_user_cart(user_id)
-        await bot.edit_message_text(chat_id = user_id,message_id = callback_query.message.message_id,
-                                    text = "👻 Ваша корзина теперь пуста 😢")
+                gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                sh = gc.open("ShopTgTable")
+                worksheet = sh.worksheet(worksheet)
+                cell = worksheet.find(articul)
+                print(cell.row,cell.col)
+                worksheet.update_cell(cell.row,5,tabel_new_amount)
+
+                await db.Corsina.update_one(
+                    {'_id': callback_query.from_user.id},
+                    {'$set': {'data': []}}
+                )
+        await callback_query.message.edit_text(text = "👻 Ваша корзина теперь пуста 😢")
 
