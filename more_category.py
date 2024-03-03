@@ -148,8 +148,13 @@ async def process_callback(bot, callback_query, current_image_index, db):
     len_photo = f"*{current_image_index + 1}/{len(images)}*\n" \
                 f"Цена: {price}"
 
-    await bot.edit_message_media(
-        media = types.InputMediaPhoto(InputFile(photo_path),caption = f"{len_photo}\n{text}",parse_mode = 'Markdown'),
-        chat_id = callback_query.message.chat.id,
-        message_id = callback_query.message.message_id,
-        reply_markup = keyboard)
+    # await bot.edit_message_media(
+    #     media = types.InputMediaPhoto(InputFile(photo_path),caption = f"{len_photo}\n{text}",parse_mode = 'Markdown'),
+    #     chat_id = callback_query.message.chat.id,
+    #     message_id = callback_query.message.message_id,
+    #     reply_markup = keyboard)
+
+    await callback_query.message.edit_media(media = types.InputMediaPhoto(InputFile(photo_path),
+                                            caption = f"{len_photo}\n{text}",
+                                            parse_mode = 'Markdown'),
+                                            reply_markup = keyboard)

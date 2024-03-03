@@ -26,11 +26,12 @@ async def get_name(bot, message, state: FSMContext):
     if len(name.split()) == 3:
         await state.get_state(ProfilState.GET_NAME)
         await ProfilState.next()
-        await bot.edit_message_text(chat_id = user_id, message_id = message_id, text = "Теперь введите область:")
+        # await message.delete()
+        await bot.send_message(message.from_user.id, "Теперь введите область:")
     else:
         await ProfilState.GET_NAME.set()
         # await bot.send_message(chat_id = user_id, text = "Введите свое имя в формате ФИО:")
-    # await bot.delete_message(chat_id = message.chat.id,message_id = message.message_id)
+    #
 
     # await bot.delete_message(chat_id = message.from_user.id,message_id = message.message_id)
 
@@ -41,7 +42,8 @@ async def get_region(bot, message, state: FSMContext):
     # await bot.send_message(user_id, f'Регион {region}')
     await state.get_state(ProfilState.GET_REGION)
     await ProfilState.next()
-    await bot.edit_message_text(chat_id = user_id, message_id = message_id, text = "Теперь введите город:")
+    # await message.delete()
+    await bot.send_message(message.from_user.id, "Теперь введите город:")
 
 
 async def get_city(bot, message, state: FSMContext):
@@ -50,7 +52,8 @@ async def get_city(bot, message, state: FSMContext):
     # await bot.send_message(user_id, f'Город {city}')
     await state.get_state(ProfilState.GET_CITY)
     await ProfilState.next()
-    await bot.edit_message_text(chat_id = user_id, message_id = message_id, text = "Теперь введите улицу:")
+    # await message.delete()
+    await bot.send_message(message.from_user.id,"Теперь введите улицу:")
 
 async def get_street(bot, message, state: FSMContext):
     user_id = message.from_user.id
@@ -58,7 +61,8 @@ async def get_street(bot, message, state: FSMContext):
     # await bot.send_message(user_id, f'улица {street}')
     await state.get_state(ProfilState.GET_STREET)
     await ProfilState.next()
-    await bot.edit_message_text(chat_id = user_id, message_id = message_id, text = "Теперь введите дом:")
+    # await message.delete()
+    await bot.send_message(message.from_user.id,"Теперь введите дом:")
 
 
 
@@ -67,13 +71,15 @@ async def get_house_numb(bot, message, state: FSMContext):
 
     await state.get_state(ProfilState.GET_APARTMENT)
     await ProfilState.next()
-    await bot.edit_message_text(chat_id = user_id, message_id = message_id, text = "Теперь введите квартиру:")
+    # await message.delete()
+    await bot.send_message(message.from_user.id,"Теперь введите квартиру:")
 
 async def get_apartment(bot,message,state: FSMContext):
     user_id = message.from_user.id
     await state.get_state(ProfilState.GET_HOUSE)
     await ProfilState.next()
-    await bot.edit_message_text(chat_id = user_id,message_id = message_id,text = "Теперь введите индекс:")
+    # await message.delete()
+    await bot.send_message(message.from_user.id, "Теперь введите индекс:")
 
 async def get_indecs(bot, message, state: FSMContext):
     user_id = message.from_user.id

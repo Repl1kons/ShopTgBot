@@ -22,7 +22,7 @@ async def init_image_caption(worksheet):
     return image_captions
 
 
-async def send_photo(bot, chat_id, product):
+async def send_photo(bot, callback_query: types.CallbackQuery, product):
     cur_img_ind = 0
     cur_img_cap = 1
 
@@ -31,9 +31,9 @@ async def send_photo(bot, chat_id, product):
     image_captions = await init_image_caption(product)
     print(image_captions[cur_img_ind][1][0][0])
 
-    caption = f"{cur_img_cap}/{len(image_captions)}\n{image_captions[cur_img_ind][1][0][1]}\nЦена: {image_captions[cur_img_ind][1][0][4]}"
+    caption = f"{image_captions[cur_img_ind][1][0][1]}\nЦена: {image_captions[cur_img_ind][1][0][4]}\nВариант: {cur_img_cap} из {len(image_captions)}"
 
-    await bot.send_photo(chat_id,
+    await bot.send_photo(callback_query.from_user.id,
                          photo = image_captions[cur_img_ind][1][0][0],
                          caption = caption,
                          reply_markup = keyboard)
@@ -93,11 +93,14 @@ async def process_callback(bot, callback_query, cur_img_indx, cur_img_caption, p
         await callback_query.answer()
 
     media = image_captions[cur_img_indx][1][0][0]
-    caption = f"{cur_img_caption}/{len(image_captions)}\n{image_captions[cur_img_indx][1][0][1]}\nЦена: {image_captions[cur_img_indx][1][0][4]}"
+    caption = f"{image_captions[cur_img_indx][1][0][1]}\nЦена: {image_captions[cur_img_indx][1][0][4]}\nВариант: {cur_img_caption} из {len(image_captions)}"
     keyboard = Inline_keyboard.create_category_keyboard(cur_img_indx, cur_img_caption, product)
 
-    await bot.edit_message_media(
-        media = types.InputMediaPhoto(media,caption = caption),
-        chat_id = callback_query.message.chat.id,
-        message_id = callback_query.message.message_id,
-        reply_markup = keyboard)
+    await callback_query.message.edit_media(media=types.InputMediaPhoto(media, caption=caption),
+                                            reply_markup = keyboard)
+
+    # await callback_query.message.edit_message_media(
+    #     media = types.InputMediaPhoto(media,caption = caption),
+    #     chat_id = callback_query.message.chat.id,
+    #     message_id = callback_query.message.message_id,
+    #     reply_markup = keyboard)

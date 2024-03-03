@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 import random
 from contextlib import suppress
@@ -22,6 +23,8 @@ from keyboards.Inline import Inline_keyboard
 from pymongo.errors import DuplicateKeyError
 from motor.motor_asyncio import AsyncIOMotorClient
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import urllib.parse
+from aiohttp import web
 
 
 # logger = logging.getLogger('Shop-bot')
@@ -48,21 +51,47 @@ class PaymentState(StatesGroup):
     CONFIRMATION = State()
 
 
+class PublishState(StatesGroup):
+    Text = State()
+    NeedButton = State()
+    ButtonText = State()
+    ButtonLink = State()
+    SetTime = State()
+    SendTime = State()
 
+storage = MemoryStorage()
+bot = Bot(token = config.BOT_TOKEN)
+Bot.set_current(bot)
 
+dp = Dispatcher(bot,storage = storage)
+app = web.Application()
 
-async def start_bot():
-    storage = MemoryStorage()
-    bot = Bot(token = config.BOT_TOKEN)
-    dp = Dispatcher(bot,storage = storage)
-    cluster = AsyncIOMotorClient(host = 'localhost:27017')
+webhook_path = f'/{config.BOT_TOKEN}'
+
+async def set_webhook():
+    webhook_uri = f'https://0f10-213-187-120-133.ngrok-free.app{webhook_path}'
+    await bot.set_webhook(webhook_uri)
+async def start_bot(_):
+
+    await set_webhook()
+    username = 'garnlzerx'
+    password = 'AfroN2564@123'
+    host = '194.87.103.113'
+    port = 27017
+
+    # Экранируем имя пользователя и пароль
+    escaped_username = urllib.parse.quote_plus(username)
+    escaped_password = urllib.parse.quote_plus(password)
+
+    # Подключаемся к MongoDB с указанием экранированного имени пользователя, пароля и хоста
+    cluster = AsyncIOMotorClient(f'mongodb://{escaped_username}:{escaped_password}@{host}:{port}')
     db = cluster.ShopTgBot
 
     dp.message_handler(commands = ['start'])(lambda message: send_welcome(message, bot, db))
     dp.message_handler(commands = ['status'])(lambda message: status_command(message, bot))
     dp.message_handler(lambda message: message.text in ['🆘 Помощь', '/help'])(lambda message: command_help(message, bot))
     dp.message_handler(lambda message: message.text == "👨Профиль")(lambda message: profil_user(message, bot, db))
-    dp.callback_query_handler(lambda c: c.data == 'create_data_profil')(lambda call, state=FSMContext: create_profil(bot, call, state))
+    dp.callback_query_handler(lambda c: c.data == 'create_data_profil')(lambda call, state=FSMContext: create_profil(call, bot, state))
     dp.message_handler(state = profil_register.ProfilState.GET_NAME)(lambda message, state=FSMContext: start_profile_name(bot, message, state))
     dp.message_handler(state = profil_register.ProfilState.GET_REGION)(lambda message, state=FSMContext: start_profile_region(bot, message, state))
     dp.message_handler(state = profil_register.ProfilState.GET_CITY)(lambda message, state=FSMContext: start_profile_city(bot, message, state))
@@ -112,6 +141,18 @@ async def start_bot():
     dp.register_message_handler(lambda message: successful_payment(message,bot,db), content_types = types.ContentTypes.SUCCESSFUL_PAYMENT)
     dp.register_errors_handler(error_handler)
 
+    dp.message_handler(lambda message: message.text == "Публикация анонсов/объявлений")(
+        lambda message: start_send_anounce(message))
+    dp.message_handler(content_types = ['photo'],state = PublishState.Text)(process_announcement_photo)
+    dp.message_handler(state = PublishState.Text)(process_announcement_text)
+    dp.message_handler(state = PublishState.NeedButton)(process_need_button)
+    dp.message_handler(state = PublishState.ButtonText)(process_button_text)
+    dp.message_handler(state = PublishState.ButtonLink)(process_button_link)
+    dp.message_handler(state = PublishState.SetTime)(lambda message,state=FSMContext: process_set_time(message,state,db,bot))
+    dp.message_handler(state = PublishState.SendTime)(
+        lambda message,state=FSMContext: process_send_time(message,state,db,bot))
+    sheduler.start()
+
     try:
         await dp.start_polling(bot)
     finally:
@@ -131,6 +172,7 @@ async def send_welcome(message: types.Message, bot: Bot, db):
             f"- 📘 *Стильные ежедневники*\n" \
             f"- 🌟 *И многое другое*\n\n" \
             f"*Создано специально для it's my planner | by A-STUDENT!*"
+
     else:
         with suppress(DuplicateKeyError):
             await db.User.insert_one(dict(
@@ -183,17 +225,124 @@ async def send_welcome(message: types.Message, bot: Bot, db):
             f"*Создано специально для it's my planner | by A-STUDENT!*"
             # f"Вы передали параметр: {start_param}"
 
-    await bot.send_message(message.chat.id, welcome_message, reply_markup = Markup_keyboards.main_menu,
-                               parse_mode = 'Markdown')
+    if message.from_user.id == config.ID_ADMIN:
+        keyboard = Markup_keyboards.main_menu_for_admin
+    else:
+        keyboard = Markup_keyboards.main_menu
+
+    await bot.send_photo(chat_id = message.chat.id,
+                         photo = 'https://sun9-50.userapi.com/c844618/v844618035/16fe2/p0DF8Fee8Lk.jpg',
+                         caption =  welcome_message,
+                         reply_markup = keyboard,
+                         parse_mode = 'Markdown')
     # if start_param.isdigit():
     #     await find_articul.start_articul(bot,message.chat.id,start_param)
+
+
+async def start_send_anounce(message: types.Message):
+    if message.from_user.id == config.ID_ADMIN:
+        await message.reply("Введи текст анонса:")
+        await PublishState.Text.set()
+
+async def process_announcement_photo(message: types.Message, state: FSMContext):
+    photo = message.photo[-1]
+    print(message.photo)
+
+    data = await state.get_data()
+    print(data)
+    data['photo'] = {
+        'file_id': photo.file_id,
+        'caption': message.caption
+    }
+
+    await state.set_data(data)
+
+    await message.reply("Требуется ли кнопка (да/нет)?")
+    await PublishState.NeedButton.set()
+
+async def process_announcement_text(message: types.Message, state: FSMContext):
+    announcement_text = message.text
+    await message.reply("Требуется ли кнопка (да/нет)?")
+    await PublishState.NeedButton.set()
+    await state.update_data(announcement_text=announcement_text)
+
+async def process_need_button(message: types.Message, state: FSMContext):
+    if message.text.lower() == 'да':
+        await message.reply("Введи текст кнопки:")
+        await PublishState.ButtonText.set()
+    else:
+        await message.reply("Введите дату и время в формате YYYY-MM-DD HH:MM")
+        await PublishState.SetTime.set()
+    await state.update_data(need_button=message.text.lower())
+
+async def process_button_text(message: types.Message, state: FSMContext):
+    text_inl = message.text
+    await message.reply("Введи ссылку для кнопки:")
+    await PublishState.ButtonLink.set()
+    await state.update_data(text_inl=text_inl)
+
+async def process_button_link(message: types.Message, state: FSMContext):
+        link_inl = message.text
+        await state.update_data(link_inl=link_inl)
+        await message.reply("Введите дату и время в формате YYYY-MM-DD HH:MM")
+        await PublishState.SetTime.set()
+
+async def process_set_time(message: types.Message, state: FSMContext, db, bot: Bot):
+    try:
+        date_time_str = message.text
+        date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M')
+        await state.update_data(time_set=date_time_obj)
+        await message.reply(f"Вы установили дату и время: {date_time_obj}")
+        await process_send_time(message, state, db, bot)
+    except ValueError:
+        await message.reply("Некорректный формат времени. Пожалуйста, введите время в формате YYYY-MM-DD HH:MM")
+
+async def send_time(users_id, text, need_button, text_inl, link, photo_data, bot):
+    if need_button == "да":
+        send_markup = InlineKeyboardMarkup(row_width=1)
+        button = InlineKeyboardButton(text=text_inl, url=link)
+        send_markup.add(button)
+        if photo_data:
+            for _id in users_id:
+                await bot.send_photo(chat_id=_id, photo=photo_data['file_id'], caption=photo_data['caption'], reply_markup=send_markup)
+        else:
+            for _id in users_id:
+                await bot.send_message(chat_id=_id, text=text, reply_markup=send_markup)
+    else:
+        if photo_data:
+            for _id in users_id:
+                await bot.send_photo(chat_id=_id, photo=photo_data['file_id'], caption=photo_data['caption'])
+        else:
+            for _id in users_id:
+                await bot.send_message(chat_id=_id, text=text)
+
+async def process_send_time(message: types.Message, state: FSMContext, db, bot: Bot):
+    async with state.proxy() as data:
+        text = data.get('announcement_text', '')  # Используем пустую строку, если ключ отсутствует
+        text_inl = data.get("text_inl", "")
+        link = data.get("link_inl", "")
+        photo_data = data.get('photo')  # Получаем информацию о фото (если оно было прикреплено)
+        time_set = data.get('time_set')
+        need_button = data.get('need_button')
+        print(data)
+    user_id = []
+    async for user in db.User.find({}):
+        user_id.append(user["_id"])
+
+    print(user_id)
+
+    sheduler.add_job(send_time, trigger='date', run_date=time_set, args=[user_id, text, need_button, text_inl, link, photo_data, bot])
+    await state.finish()
+
+
+
 
 async def command_help(message: types.Message, bot: Bot):
     await bot.send_message(message.chat.id,
                            "Если у вас есть вопросы по поводу работе бота или другая информация - напишите нам\n https://t.me/Garnlzerx")
 
 async def my_order(callback_query: types.CallbackQuery, bot: Bot, db):
-    await bot.delete_message(callback_query.from_user.id,callback_query.message.message_id)
+    await callback_query.message.delete()
 
     if callback_query.from_user.id == config.ID_ADMIN:
         user_order_data = await db.Order.find({}).to_list(length = None)
@@ -215,7 +364,7 @@ async def my_order(callback_query: types.CallbackQuery, bot: Bot, db):
     message_text = (
         "*Выберите номер заказа для просмотра*\n\n"
         if user_order_data
-        else "Похоже вы еще не сделали ни одного заказа🤨"
+        else "Похоже вы еще не сделали ни одного заказа"
     )
 
     returnProfilButton = InlineKeyboardButton(text = 'Назад',callback_data = 'returnProfil')
@@ -302,6 +451,11 @@ async def callback_edit_status(callback_query: types.CallbackQuery, bot: Bot, db
         {'$set': {'status': status}}
     )
     await bot.send_message(callback_query.from_user.id, f"Статус заказа был изменен на {status}")
+    user_data = await db.Order.find_one({'order_id': order})
+    user_id = user_data['user_id']
+    await bot.send_message(user_id, f"Статус вашего заказа: {order}\n"
+                                         f"был изменен на *{status}*",
+                                         parse_mode = 'Markdown')
     await callback_query.answer()
 
 async def profil_user(message: types.Message, bot: Bot, db):
@@ -341,7 +495,7 @@ async def handle_find_art(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as profil_data:
         profil_data["articul"] = message.text
         await catalog.get_articul(bot, message, state)
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
 
 async def create_profil(callback_query: types.CallbackQuery, bot: Bot, state: FSMContext):
     await profil_register.process_callback(bot, callback_query, state)
@@ -351,45 +505,45 @@ async def show_basket(callback_query: types.CallbackQuery, bot: Bot, db):
     await corsina.show_cart(bot, callback_query, db)
     await callback_query.answer()
 async def start_profile_name(bot, message: types.Message, state: FSMContext):
-    async with state.proxy() as profil_data:
+    async with (state.proxy() as profil_data):
         profil_data["name"] = message.text
         await profil_register.get_name(bot, message, state)
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
 
 async def start_profile_region(bot, message: types.Message, state: FSMContext):
     async with state.proxy() as profil_data:
         profil_data["region"] = message.text
         await profil_register.get_region(bot, message, state)
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
 
 async def start_profile_city(bot, message: types.Message, state: FSMContext):
     async with state.proxy() as profil_data:
         profil_data["city"] = message.text
         await profil_register.get_city(bot, message, state)
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
 
 async def start_profile_street(bot, message: types.Message, state: FSMContext):
     async with state.proxy() as profil_data:
         profil_data["street"] = message.text
         await profil_register.get_street(bot, message, state)
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
 
 async def start_profile_house(bot, message: types.Message, state: FSMContext):
     async with state.proxy() as profil_data:
         profil_data["house"] = message.text
         await profil_register.get_house_numb(bot, message, state)
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
 
 async def start_profile_appartment(bot, message: types.Message, state: FSMContext):
     async with state.proxy() as profil_data:
         profil_data["apartment"] = message.text
         await profil_register.get_apartment(bot, message, state)
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
 
 async def start_profile_indecs(bot, message: types.Message, state: FSMContext):
     async with state.proxy() as profil_data:
         profil_data["indecs"] = message.text
-        await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+        await message.delete()
         await profil_register.get_indecs(bot, message, state)
         await bot.send_message(message.from_user.id,
                                f"Пожалуйста, подтвердите введенные данные.\n\n"
@@ -407,17 +561,17 @@ async def change_data(callback_query: types.CallbackQuery, bot: Bot, state: FSMC
     await callback_query.answer()
 
 async def return_on_order(callback_query: types.CallbackQuery, bot: Bot, db):
-    await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+    await callback_query.message.delete()
     await my_order(callback_query, bot, db)
     await callback_query.answer()
 
 async def return_on_profile(callback_query: types.CallbackQuery, bot, db):
-    await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+    await callback_query.message.delete()
     await profil_user(callback_query, bot, db)
     await callback_query.answer()
 
 async def process_data_enter(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot, db):
-    await bot.delete_message(chat_id = callback_query.from_user.id, message_id = callback_query.message.message_id)
+    await callback_query.message.delete()
     await profil_register.conf(bot, callback_query, state, db)
     await callback_query.answer()
 
@@ -430,11 +584,11 @@ async def create_info_user(bot, callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, "Введите ваше имя в формате ФИО:\nАккуратней, я очень чувствителен к формату")
 
 async def handle_catalog_1(bot, message: types.Message):
-    await bot.delete_message(message.chat.id, message.message_id)
+    await message.delete()
     await handle_catalog_button(bot, message.chat.id)
 
 async def back_return(bot, callback_query: types.CallbackQuery):
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await callback_query.message.delete()
     await handle_catalog_button(bot, callback_query.message.chat.id)
     await callback_query.answer()
 
@@ -516,42 +670,48 @@ async def process_name(message: types.Message, state: FSMContext, bot: Bot):
             data['name'] = message.text
     await PaymentState.next()
     await bot.send_message(message.from_user.id, text = "Теперь введите область:")
-    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+    await message.delete()
+
 
 async def process_region(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as data:
         data['region'] = message.text
     await PaymentState.next()
     await bot.send_message(message.from_user.id, text = "Введите пожалуйста город в котором вы живете:")
-    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+    await message.delete()
+
 
 async def process_city(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as data:
         data['city'] = message.text
     await PaymentState.next()
     await bot.send_message(message.from_user.id, text = "Отлично, осталось совсем чуть-чуть, теперь введите название вашей улицы:")
-    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+    await message.delete()
+
 
 async def process_street(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as data:
         data['street'] = message.text
     await PaymentState.next()
     await bot.send_message(message.from_user.id, text = "Введите номер вашего дома:")
-    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+    await message.delete()
+
 
 async def process_house(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as data:
         data['house'] = message.text
     await PaymentState.next()
     await bot.send_message(message.from_user.id, text = "Теперь введите номер квартиры")
-    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+    await message.delete()
+
 
 async def process_appoortm(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as data:
         data['apartment'] = message.text
     await PaymentState.next()
     await bot.send_message(message.from_user.id, text = "И наконец, введите индекс")
-    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+    await message.delete()
+
 
 async def process_indx(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as data:
@@ -560,7 +720,8 @@ async def process_indx(message: types.Message, state: FSMContext, bot: Bot):
     await bot.send_message(message.from_user.id, text = f"Пожалуйста, подтвердите введенные данные."
                                        f"\n\nИмя: {data['name']}\nОбласть: {data['region']}\nГород: {data['city']}\nУлица: {data['street']}\nДом: {data['house']}\nКвартира: {data['apartment']}\nИндекс: {data['indecs']}",
                                 reply_markup = Inline_keyboard.user_data)
-    await bot.delete_message(chat_id = message.from_user.id, message_id = message.message_id)
+    await message.delete()
+
 
 async def process_data_enter_state(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot, db):
     user_id = callback_query.from_user.id
@@ -581,7 +742,8 @@ async def process_data_enter_state(callback_query: types.CallbackQuery, state: F
 
 
     await callback_query.message.edit_text(text = "Отлично теперь нажмите на кнопку оплаты: ")
-    await bot.delete_message(chat_id = callback_query.message.chat.id, message_id = callback_query.message.message_id)
+    await callback_query.message.delete()
+    # await callback_query.message.edit_media()
 
     await state.finish()
 
@@ -728,7 +890,7 @@ async def successful_payment(message: types.Message, bot: Bot, db):
 
 async def handle_category_choice(callback_query: types.CallbackQuery, bot: Bot):
     category = callback_query.data.split('_')[1]
-    await show_category_products(bot, callback_query.message.chat.id, category)
+    await show_category_products(bot, callback_query, category)
     await callback_query.answer()
 
 async def handle_corzina_sum(callback_query: types.CallbackQuery, bot: Bot, db):
@@ -751,7 +913,25 @@ async def error_handler(update: types.Update, exception):
     print("An error occurred while processing an update:")
     print(exception)
 
+async def handle_webhook(requests):
+    url = str(requests.url)
+    index = url.rfind('/')
+    token = url[index+1:]
+
+    if token == config.API_TOKEN:
+        requests_data = await requests.json()
+        update = types.Update(**requests_data)
+        await dp.process_update(update)
+
+        return web.Response()
+    else:
+        return web.Response(status = 403)
+
+app.router.add_post(f'/{config.API_TOKEN}', handle_webhook)
 
 if __name__ == '__main__':
-    asyncio.run(start_bot())
+    app.on_startup.append(start_bot)
+    web.run_app(app,
+                host = '0.0.0.0',
+                port = 8080)
 

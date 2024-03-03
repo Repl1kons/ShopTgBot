@@ -88,7 +88,7 @@ async def process_callback(bot,callback_query,cur_img_indx,cur_img_caption,db):
 
         await bot.delete_message(chat_id = callback_query.message.chat.id,
                                  message_id = callback_query.message.message_id)
-        await photo_handler.send_photo(bot,callback_query.from_user.id,path_name_2)
+        await photo_handler.send_photo(bot, callback_query, path_name_2)
 
     if callback_query.data.startswith('back-enter'):
         if cur_img_indx > 0:
@@ -193,8 +193,11 @@ async def process_callback(bot,callback_query,cur_img_indx,cur_img_caption,db):
 
     keyboard = Inline_keyboard.create_category_product_keyboard(cur_img_indx,cur_img_caption)
 
-    await bot.edit_message_media(
-        media = types.InputMediaPhoto(media,caption = caption),
-        chat_id = callback_query.message.chat.id,
-        message_id = callback_query.message.message_id,
-        reply_markup = keyboard)
+    # await bot.edit_message_media(
+    #     media = types.InputMediaPhoto(media,caption = caption),
+    #     chat_id = callback_query.message.chat.id,
+    #     message_id = callback_query.message.message_id,
+    #     reply_markup = keyboard)
+
+    await callback_query.message.edit_media(media = types.InputMediaPhoto(media,caption = caption),
+                                            reply_markup = keyboard)

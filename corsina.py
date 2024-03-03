@@ -90,8 +90,8 @@ async def show_cart(bot, message: types.Message, db):
 
             total_price += order_amount_price
             cart_contents += (f"\n*{order['product_name']}*\n "
-                              f"_Артикул:_ {order['articul']}\n "
-                              f"_Вариант:_ {order['selected_variant']}\n"
+                              f"┄_Артикул:_ {order['articul']}\n "
+                              f"┄_Вариант:_ {order['selected_variant']}\n"
                               f"{order['quantity']} шт. x {order['price']} ₽\n"
                               f"Сумма: {order['quantity'] * order['price']} ₽\n"
                               f"----------\n")
