@@ -8,3 +8,4 @@ google-api-python-client~=2.118.0
 flet~=0.17.0
 aiocache~=0.12.2
 cachetools~=5.3.2
+Pillow~=9.5.0
