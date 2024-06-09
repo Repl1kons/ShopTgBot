@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import logging
 import random
 from contextlib import suppress
 import catalog
@@ -15,7 +14,7 @@ import corsina
 from catalog import handle_catalog_button, show_category_products
 import photo_handler
 import photo_hendler_two
-from aiogram.types import ContentTypes,InlineKeyboardMarkup,InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from keyboards.Markup import Markup_keyboards
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
@@ -23,9 +22,7 @@ from keyboards.Inline import Inline_keyboard
 from pymongo.errors import DuplicateKeyError
 from motor.motor_asyncio import AsyncIOMotorClient
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import test
 import urllib.parse
-from aiohttp import web
 
 
 # logger = logging.getLogger('Shop-bot')
