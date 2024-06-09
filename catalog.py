@@ -10,8 +10,10 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 class ArticulForm(StatesGroup):
     articul_numb = State()
 
-async def handle_catalog_button(bot, chat_id):
-    await bot.send_message(chat_id, "Выберите категорию товаров", reply_markup = Inline_keyboard.show_catalogs)
+async def handle_catalog_button(bot,chat_id):
+    await bot.send_photo(chat_id,photo = types.InputFile("data/img/catalog_img.jpg"),caption = "Выберите категорию товаров",
+                         reply_markup = Inline_keyboard.show_catalogs)
+
 
 async def get_articul(bot, message, state: FSMContext):
     user_id = message.from_user.id
@@ -28,18 +30,18 @@ async def get_articul(bot, message, state: FSMContext):
 async def show_category_products(bot, callback_query: types.CallbackQuery, category):
     if category == "📔 Ежедневники":
         product = "categoryPlaners"
-        await callback_query.message.delete()
+        # await callback_query.message.delete()
         await send_photo(bot, callback_query, product)
 
 
     if category == "🖼 Обложки":
         product = "categoryCovers"
-        await callback_query.message.delete()
+        # await callback_query.message.delete()
         await send_photo(bot,callback_query,product)
 
     if category == "💳 Кард-холдеры":
         product = "categoryCardholder"
-        await callback_query.message.delete()
+        # await callback_query.message.delete()
         await send_photo(bot,callback_query,product)
 
     # if category == '🔍 Поиск артикула':

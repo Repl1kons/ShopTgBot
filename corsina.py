@@ -134,7 +134,7 @@ async def edit_cart_Delete(bot, callback_query: types.CallbackQuery, corzinaEdit
             new_all_amount = max_amount + now_amount
 
             if int(order['id']) == int(corzinaEdit):
-                gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                gc = gspread.service_account(filename = 'data/json/shoptg-97da5d92bfcd.json')
                 sh = gc.open("ShopTgTable")
                 worksheet = sh.worksheet(worksheet)
                 cell = worksheet.find(articul)
@@ -174,7 +174,7 @@ async def edit_cart_amount_Sum(bot, callback_query: types.CallbackQuery, corzina
                 new_amount = now_amount + 1
                 tabel_new_amount = max_amount - 1
                 if int(order['id']) == int(corzinaEdit):
-                    gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                    gc = gspread.service_account(filename = 'data/json/shoptg-97da5d92bfcd.json')
                     sh = gc.open("ShopTgTable")
                     worksheet = sh.worksheet(worksheet)
                     cell = worksheet.find(articul)
@@ -210,7 +210,7 @@ async def edit_cart_amount_Min(bot, callback_query: types.CallbackQuery, corzina
                 new_amount = now_amount - 1
                 tabel_new_amount = max_amount + 1
                 if int(order['id']) == int(corzinaEdit):
-                    gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                    gc = gspread.service_account(filename = 'data/json/shoptg-97da5d92bfcd.json')
                     sh = gc.open("ShopTgTable")
                     worksheet = sh.worksheet(worksheet)
                     cell = worksheet.find(articul)
@@ -253,7 +253,7 @@ async def process_callback(bot, callback_query: types.CallbackQuery, db):
                 new_amount = now_amount - 1
                 tabel_new_amount = max_amount + 1
 
-                gc = gspread.service_account(filename = 'shoptg-97da5d92bfcd.json')
+                gc = gspread.service_account(filename = 'data/json/shoptg-97da5d92bfcd.json')
                 sh = gc.open("ShopTgTable")
                 worksheet = sh.worksheet(worksheet)
                 cell = worksheet.find(articul)

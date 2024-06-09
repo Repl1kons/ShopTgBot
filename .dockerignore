@@ -69,7 +69,7 @@ out/
 
 README.md
 *.csv
-photo/
+data/photo/
 *.log
 test.py
 

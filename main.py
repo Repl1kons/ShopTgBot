@@ -23,6 +23,7 @@ from keyboards.Inline import Inline_keyboard
 from pymongo.errors import DuplicateKeyError
 from motor.motor_asyncio import AsyncIOMotorClient
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import test
 import urllib.parse
 from aiohttp import web
 
@@ -61,32 +62,32 @@ class PublishState(StatesGroup):
 
 storage = MemoryStorage()
 bot = Bot(token = config.BOT_TOKEN)
-Bot.set_current(bot)
+# Bot.set_current(bot)
 
 dp = Dispatcher(bot,storage = storage)
-app = web.Application()
+# app = web.Application()
 
-webhook_path = f'/{config.BOT_TOKEN}'
+# webhook_path = f'/{config.BOT_TOKEN}'
 
-async def set_webhook():
-    webhook_uri = f'https://0f10-213-187-120-133.ngrok-free.app{webhook_path}'
-    await bot.set_webhook(webhook_uri)
-async def start_bot(_):
+# async def set_webhook():
+#     webhook_uri = f'https://0f10-213-187-120-133.ngrok-free.app{webhook_path}'
+#     await bot.set_webhook(webhook_uri)
+async def start_bot():
 
-    await set_webhook()
-    username = 'garnlzerx'
-    password = 'AfroN2564@123'
-    host = '194.87.103.113'
+    # await set_webhook()
+    username = 'mongoadmin'
+    password = 'SADasdiiasdjasod'
+    host = '212.233.75.7'
     port = 27017
-
-    # Экранируем имя пользователя и пароль
+    #
+    # # Экранируем имя пользователя и пароль
     escaped_username = urllib.parse.quote_plus(username)
     escaped_password = urllib.parse.quote_plus(password)
 
     # Подключаемся к MongoDB с указанием экранированного имени пользователя, пароля и хоста
     cluster = AsyncIOMotorClient(f'mongodb://{escaped_username}:{escaped_password}@{host}:{port}')
+    # cluster = AsyncIOMotorClient(host = 'localhost',port = 27017)
     db = cluster.ShopTgBot
-
     dp.message_handler(commands = ['start'])(lambda message: send_welcome(message, bot, db))
     dp.message_handler(commands = ['status'])(lambda message: status_command(message, bot))
     dp.message_handler(lambda message: message.text in ['🆘 Помощь', '/help'])(lambda message: command_help(message, bot))
@@ -214,6 +215,7 @@ async def send_welcome(message: types.Message, bot: Bot, db):
                 data = []
             ))
 
+
             await message.answer("Вы успешно зарегистрированы в базе данных.")
 
         welcome_message = \
@@ -235,6 +237,8 @@ async def send_welcome(message: types.Message, bot: Bot, db):
                          caption =  welcome_message,
                          reply_markup = keyboard,
                          parse_mode = 'Markdown')
+
+
     # if start_param.isdigit():
     #     await find_articul.start_articul(bot,message.chat.id,start_param)
 
@@ -243,6 +247,7 @@ async def start_send_anounce(message: types.Message):
     if message.from_user.id == config.ID_ADMIN:
         await message.reply("Введи текст анонса:")
         await PublishState.Text.set()
+
 
 async def process_announcement_photo(message: types.Message, state: FSMContext):
     photo = message.photo[-1]
@@ -627,20 +632,30 @@ async def change_data_state(callback_query: types.CallbackQuery, state: FSMConte
         print(f"Ошибка: {e}")
     await callback_query.answer()
 
+
+# Если данные уже введены
 async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext, bot: Bot, db):
     await state.finish()
     user_corsina = await db.Corsina.find_one({'_id': callback_query.from_user.id})
     user_corsina_data = user_corsina['data']
+
     total_price = 0
 
     for order in user_corsina_data:
-        amount = int(order['quantity'])
-        price = int(order['price'])
-        total_price += int(price * amount)
-    print(f"total price {int(total_price)}")
+        order_price = int(order['price'])
+        order_quantity = int(order['quantity'])
+        total_amount_price = order_price * order_quantity
+        total_price += total_amount_price
+
+    item_number = sum(int(order['quantity']) for order in user_corsina_data)
+
+    cart_contents = (f'Кол-во товаров: {item_number} шт. {total_price}₽                                  '
+                     f'                                                 '
+                     f'Всего к оплате: {total_price + 300} руб.')
+
     await bot.send_invoice(callback_query.from_user.id,
                            title = "Оплата корзины",
-                           description = "Описание вашей корзины",
+                           description = cart_contents,
                            provider_token = config.PAYMENT_TOKEN,
                            currency = 'rub',
                            prices = [
@@ -656,7 +671,22 @@ async def confirm_data(callback_query: types.CallbackQuery, state: FSMContext, b
                            max_tip_amount = 50000,
                            suggested_tip_amounts = [10000, 15000, 20000, 30000],
                            start_parameter = 'pay',
-                           payload = 'test-invoice-payload')
+                           payload = 'test-invoice-payload',
+                           photo_url = 'https://media.istockphoto.com/id/1411757519/ru/%D0%B2%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%BD%D0%B0%D1%8F/3d-%D0%B2%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%BD%D0%B0%D1%8F-%D1%82%D0%B5%D0%BB%D0%B5%D0%B6%D0%BA%D0%B0-%D0%B4%D0%BB%D1%8F-%D0%BF%D0%BE%D0%BA%D1%83%D0%BF%D0%BE%D0%BA-%D1%81-%D0%BA%D0%BE%D1%80%D0%BE%D0%B1%D0%BA%D0%B0%D0%BC%D0%B8-%D0%B4%D0%BB%D1%8F-%D0%BF%D0%BE%D1%81%D1%8B%D0%BB%D0%BE%D0%BA-%D0%BA%D0%BE%D0%BD%D1%86%D0%B5%D0%BF%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE%D0%BA%D1%83%D0%BF%D0%BE%D0%BA-%D0%B2-%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82%D0%B5.jpg?s=612x612&w=0&k=20&c=GQjEMbmLcdDAe_lSmG4MBtFHJ3PL-k1lixwMLbgtIMc='
+                           # provider_data = {'receipt': {
+                           #     'email': 'dubovkonstantyn@yandex.ru',
+                           #     'items': [{
+                           #         'description': "Товар A",
+                           #         'quantity': '1.00',
+                           #         'amount': {
+                           #             'value': '60.00',
+                           #             'currency': 'RUB',
+                           #         },
+                           #         'vat_code': 1
+                           #     }]
+                           # }}
+                           )
+
     await callback_query.answer()
 
 async def edit_cart(message: types.Message, state: FSMContext, bot):
@@ -668,9 +698,15 @@ async def process_name(message: types.Message, state: FSMContext, bot: Bot):
     async with state.proxy() as data:
         if len(message.text.split()) == 3:
             data['name'] = message.text
-    await PaymentState.next()
-    await bot.send_message(message.from_user.id, text = "Теперь введите область:")
-    await message.delete()
+            await PaymentState.next()
+            await bot.send_message(message.from_user.id,text = "Теперь введите область:")
+            await message.delete()
+        else:
+            await message.delete()
+            await PaymentState.ASK_NAME.set()
+            # await bot.send_message(message.from_user.id, "Введите ваше имя в формате ФИО:\nАккуратней, я очень чувствителен к формату ")
+
+
 
 
 async def process_region(message: types.Message, state: FSMContext, bot: Bot):
@@ -757,10 +793,16 @@ async def process_data_enter_state(callback_query: types.CallbackQuery, state: F
         price = int(order['price'])
         total_price += int(price * amount)
 
+    item_number = sum(int(order['quantity']) for order in user_corsina_data)
+
+    cart_contents = (f'Кол-во товаров: {item_number} шт. {total_price}₽                                  '
+                     f'                                                 '
+                     f'Всего к оплате: {total_price + 300} руб.')
+
     print(f"total price {int(total_price)}")
     await bot.send_invoice(callback_query.from_user.id,
                            title = "Оплата корзины",
-                           description = "Описание вашей корзины",
+                           description = cart_contents,
                            provider_token = config.PAYMENT_TOKEN,
                            currency = 'rub',
                            prices = [
@@ -776,7 +818,9 @@ async def process_data_enter_state(callback_query: types.CallbackQuery, state: F
                            max_tip_amount = 50000,
                            suggested_tip_amounts = [10000, 20000, 30000, 40000],
                            start_parameter = 'pay',
-                           payload = 'test-invoice-payload')
+                           payload = 'test-invoice-payload',
+                           photo_url = 'https://media.istockphoto.com/id/1411757519/ru/%D0%B2%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%BD%D0%B0%D1%8F/3d-%D0%B2%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%BD%D0%B0%D1%8F-%D1%82%D0%B5%D0%BB%D0%B5%D0%B6%D0%BA%D0%B0-%D0%B4%D0%BB%D1%8F-%D0%BF%D0%BE%D0%BA%D1%83%D0%BF%D0%BE%D0%BA-%D1%81-%D0%BA%D0%BE%D1%80%D0%BE%D0%B1%D0%BA%D0%B0%D0%BC%D0%B8-%D0%B4%D0%BB%D1%8F-%D0%BF%D0%BE%D1%81%D1%8B%D0%BB%D0%BE%D0%BA-%D0%BA%D0%BE%D0%BD%D1%86%D0%B5%D0%BF%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE%D0%BA%D1%83%D0%BF%D0%BE%D0%BA-%D0%B2-%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82%D0%B5.jpg?s=612x612&w=0&k=20&c=GQjEMbmLcdDAe_lSmG4MBtFHJ3PL-k1lixwMLbgtIMc='
+                           )
 
     await callback_query.answer()
 
@@ -913,25 +957,25 @@ async def error_handler(update: types.Update, exception):
     print("An error occurred while processing an update:")
     print(exception)
 
-async def handle_webhook(requests):
-    url = str(requests.url)
-    index = url.rfind('/')
-    token = url[index+1:]
-
-    if token == config.API_TOKEN:
-        requests_data = await requests.json()
-        update = types.Update(**requests_data)
-        await dp.process_update(update)
-
-        return web.Response()
-    else:
-        return web.Response(status = 403)
-
-app.router.add_post(f'/{config.API_TOKEN}', handle_webhook)
+# async def handle_webhook(requests):
+#     url = str(requests.url)
+#     index = url.rfind('/')
+#     token = url[index+1:]
+#
+#     if token == config.API_TOKEN:
+#         requests_data = await requests.json()
+#         update = types.Update(**requests_data)
+#         await dp.process_update(update)
+#
+#         return web.Response()
+#     else:
+#         return web.Response(status = 403)
+#
+# app.router.add_post(f'/{config.API_TOKEN}', handle_webhook)
 
 if __name__ == '__main__':
-    app.on_startup.append(start_bot)
-    web.run_app(app,
-                host = '0.0.0.0',
-                port = 8080)
-
+    # app.on_startup.append(start_bot)
+    # web.run_app(app,
+    #             host = '0.0.0.0',
+    #             port = 8080)
+    asyncio.run(start_bot())
